@@ -1,0 +1,87 @@
+void automation.SandboxCPLeadExpiry(Int propertyID)
+{
+propertyData = zoho.crm.getRecordById('Products',propertyID);
+Channel_Partner = propertyData.get('Account_Name');
+info Channel_Partner;
+propIdStr = propertyID.toString();
+webhookPayload = Map();
+towerData = ifnull(propertyData.get("Tower"),null);
+if(towerData != null && towerData != "" && towerData.containKey("id"))
+{
+	towerId = ifnull(towerData.get("id"),"");
+	if(towerId != "")
+	{
+		towerDetails = zoho.crm.getRecordById("Towers",towerId);
+		if(towerDetails != null)
+		{
+			webhookPayload.put("Society",ifnull(towerDetails.get("Society"),"NA"));
+			webhookPayload.put("Township",ifnull(towerDetails.get("Township"),"NA"));
+		}
+		else
+		{
+			info "Failed to fetch Tower data by towerId: " + towerId;
+			webhookPayload.put("Society","NA");
+			webhookPayload.put("Township","NA");
+		}
+	}
+}
+if(Channel_Partner != null)
+{
+	if(Channel_Partner.containKey("id"))
+	{
+		cpId = Channel_Partner.get("id");
+		info "Channel Partner ID: " + cpId;
+		cpDetails = zoho.crm.getRecordById("Accounts",cpId);
+		info "CP Details: " + cpDetails;
+		if(cpDetails != null)
+		{
+			companyData = cpDetails.get("Company_lookup");
+			info "Channel Partner data fetched successfully";
+			webhookPayload.put("Channel_Partner_Id",cpId);
+		}
+	}
+	webhookPayload.put("Property_Name",propertyData.get("Product_Name"));
+	webhookPayload.put("Property_Status",propertyData.get("Status"));
+	webhookPayload.put("Property_Source",propertyData.get("Source"));
+	webhookPayload.put("Property_Category",propertyData.get("Product_Category"));
+	webhookPayload.put("Property_Priority",propertyData.get("Priority"));
+	webhookPayload.put("Truva_RM",propertyData.get("Owner"));
+	webhookPayload.put("Unit Number",propertyData.get("Unit"));
+	webhookPayload.put("User_Type","Channel Partner");
+	webhookPayload.put("Tag_Expiry_Date",propertyData.get("Tag_Expiry_Date"));
+	webhookPayload.put("activity_name","acq_cp_lead_expiry_notification");
+	SellerName = propertyData.get("Seller");
+	if(SellerName != null && SellerName != "")
+	{
+		webhookPayload.put("Seller_Name",SellerName.get("name"));
+	}
+	else
+	{
+		info "Seller field is empty, skipping";
+	}
+	TruvaRm = propertyData.get("Owner");
+	if(TruvaRm != null && TruvaRm != "")
+	{
+		webhookPayload.put("Truva_RM",TruvaRm.get("name"));
+	}
+	else
+	{
+		info "Truva RM field is empty, skipping";
+	}
+	TowerName = ifnull(propertyData.get("Tower"),null);
+	if(TowerName != null)
+	{
+		webhookPayload.put("Tower",ifnull(TowerName.get("name"),"NA"));
+	}
+	info webhookPayload;
+	apiendpoint = "https://qqvnbapdea.execute-api.ap-south-1.amazonaws.com/prod/sandbox-netcore-event";
+	resp = invokeurl
+	[
+		url :apiendpoint
+		type :POST
+		parameters:webhookPayload.toString()
+		headers:{"Content-Type":"application/json"}
+	];
+	info "API Gateway response: " + resp;
+}
+}

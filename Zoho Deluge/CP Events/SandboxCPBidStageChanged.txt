@@ -1,0 +1,101 @@
+void automation.SandboxCPBidStageChanged(Int bidID,String bidHistory)
+{
+bidData = zoho.crm.getRecordById("Deals",bidID);
+info bidData;
+webhookPayload = Map();
+propertyData = bidData.get("Products");
+info propertyData;
+Channel_Partner = bidData.get("Account_Name");
+info Channel_Partner;
+if(Channel_Partner != null)
+{
+	if(Channel_Partner.containKey("id"))
+	{
+		cpId = Channel_Partner.get("id");
+		cpIdStr = cpId.toString();
+		webhookPayload.put("Channel_Partner_Id",cpIdStr);
+	}
+}
+Buyer_Lookup = bidData.get("Lead");
+if(Buyer_Lookup != null)
+{
+	if(Buyer_Lookup.containKey("id"))
+	{
+		leadId = Buyer_Lookup.get("id");
+		leadData = zoho.crm.getRecordById("Leads",leadId);
+		if(leadData != null)
+		{
+			webhookPayload.put("Buyer_Name",ifnull(leadData.get("Full_Name"),""));
+			webhookPayload.put("Buyer_Source",ifnull(leadData.get("Lead_Source"),""));
+			webhookPayload.put("Buyer_Status",ifnull(leadData.get("Lead_Status"),""));
+		}
+	}
+}
+Property_Lookup = bidData.get("Products");
+if(Property_Lookup != null)
+{
+	if(Property_Lookup.containKey("id"))
+	{
+		propertyId = Property_Lookup.get("id");
+		propertyData = zoho.crm.getRecordById("Products",propertyId);
+		info propertyData;
+		if(propertyData != null)
+		{
+			webhookPayload.put("Property_Name",ifnull(propertyData.get("Product_Name"),""));
+			webhookPayload.put("Unit_Number",ifnull(propertyData.get("Unit"),""));
+			webhookPayload.put("Property_Status",ifnull(propertyData.get("Status"),""));
+			webhookPayload.put("Property_Source",ifnull(propertyData.get("Source"),""));
+			webhookPayload.put("Property_Category",ifnull(propertyData.get("Product_Category"),""));
+			webhookPayload.put("Property_Priority",ifnull(propertyData.get("Priority"),""));
+			webhookPayload.put("Unit Number",ifnull(propertyData.get("Unit"),""));
+			webhookPayload.put("Google_Maps_Link",ifnull(propertyData.get("Google_Maps_Link"),""));
+			webhookPayload.put("Property_Total_No_of_Visits",ifnull(propertyData.get("Total_No_of_Visits"),""));
+		}
+		Tower_Lookup = propertyData.get("Tower");
+		if(Tower_Lookup != null)
+		{
+			if(Tower_Lookup.containKey("id"))
+			{
+				towerId = Tower_Lookup.get("id");
+				towerData = zoho.crm.getRecordById("Towers",towerId);
+				info towerData;
+				if(towerData != null)
+				{
+					webhookPayload.put("Society",ifnull(towerData.get("Society"),""));
+					webhookPayload.put("Township",ifnull(towerData.get("Township"),""));
+				}
+			}
+		}
+	}
+}
+webhookPayload.put("new_stage",ifnull(bidData.get("Stage"),""));
+webhookPayload.put("Bid_Source",ifnull(bidData.get("Lead_Source"),""));
+webhookPayload.put("Bid_Next_steps",ifnull(bidData.get("Next_steps"),""));
+webhookPayload.put("Bid_Created_Time",ifnull(bidData.get("Created_Time"),""));
+webhookPayload.put("Bid_Truva_Micromarket",ifnull(bidData.get("Truva_Micromarket"),""));
+webhookPayload.put("Dislikes",ifnull(bidData.get("Dislikes"),""));
+webhookPayload.put("No_of_Visits",ifnull(bidData.get("No_of_Visits"),""));
+webhookPayload.put("Bid_CP_Tagging_Status",ifnull(bidData.get("CP_Tagging_Status"),""));
+webhookPayload.put("previous_stage",ifnull(bidHistory.get("Stage"),""));
+webhookPayload.put("User_Type","Channel Partner");
+webhookPayload.put("activity_name","cp_bid_status_changed");
+owner = ifnull(bidData.get("Owner"),"");
+if(owner != null)
+{
+	webhookPayload.put("Bid_Owner",ifnull(owner.get("name"),""));
+}
+else
+{
+	info "Onwer field is empty, skipping it";
+}
+info webhookPayload;
+apiendpoint = "https://qqvnbapdea.execute-api.ap-south-1.amazonaws.com/prod/sandbox-netcore-event";
+resp = invokeurl
+[
+	url :apiendpoint
+	type :POST
+	parameters:webhookPayload.toString()
+	headers:{"Content-Type":"application/json"}
+];
+info "Netcore event sent. Response: " + resp.toString();
+}
