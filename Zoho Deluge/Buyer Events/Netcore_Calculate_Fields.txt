@@ -1,6 +1,6 @@
 void automation.Netcore_Calculate_Fields(Int meetingID)
 {
-API_ENDPOINT = "https://1unsvm1tw6.execute-api.ap-south-1.amazonaws.com/netcore/netcore-buyer";
+API_ENDPOINT = "https://qqvnbapdea.execute-api.ap-south-1.amazonaws.com/prod/sandbox-netcore-sync";
 completedStatuses = list();
 completedStatuses.add("Visit Complete");
 meetingData = zoho.crm.getRecordById("Events",meetingID);

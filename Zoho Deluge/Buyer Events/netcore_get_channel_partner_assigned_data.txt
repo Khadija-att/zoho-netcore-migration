@@ -1,20 +1,15 @@
 void automation.netcore_get_channel_partner_assigned_data(Int leadId)
 {
-API_ENDPOINT = "https://1unsvm1tw6.execute-api.ap-south-1.amazonaws.com/netcore/cp-update-event";
+API_ENDPOINT = "https://qqvnbapdea.execute-api.ap-south-1.amazonaws.com/prod/sandbox-netcore-event";
 leadData = zoho.crm.getRecordById('Leads',leadId);
 Channel_Partner = leadData.get('Channel_Partner');
-// Channel_Partner_ID = Channel_Partner.get('id');
-// info Channel_Partner_ID;
 ChannelPartnerData = Map();
-// ChannelPartnerData.put("cp_name",Channel_Partner.get("name"));
 ChannelPartnerData.put("tag_expiry_date",ifnull(leadData.get("Tag_Expiry_Date"),"NA"));
-// info Channel_Partner;
 if(Channel_Partner != null)
 {
 	if(Channel_Partner.containKey("id"))
 	{
 		cpId = Channel_Partner.get("id");
-		// fetch CP details only if cpId exists
 		cpDetails = zoho.crm.getRecordById("Accounts",cpId);
 		leadIdStr = leadId.toString();
 		info cpDetails;
