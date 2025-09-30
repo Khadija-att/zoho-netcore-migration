@@ -1,0 +1,102 @@
+void automation.SandboxCPBuyerMeetingCompleted(Int meetingID,String meetingHistory)
+{
+meetingData = zoho.crm.getRecordById("Events",meetingID);
+info meetingData;
+module = meetingData.get('Module');
+if(module == "Bid")
+{
+	WhatID = meetingData.get('What_Id');
+	info WhatID;
+	if(WhatID == null)
+	{
+		info "What_Id is null, skipping processing.";
+		return;
+	}
+	bidId = WhatID.get('id');
+	bidData = zoho.crm.getRecordById("Deals",bidId);
+	info bidData;
+	ChannelPartner = bidData.get("Account_Name");
+	if(ChannelPartner == null || ChannelPartner == "")
+	{
+		return;
+	}
+	cpID = ChannelPartner.get("id");
+	PropertyLookup = bidData.get('Products');
+	propertyData = zoho.crm.getRecordById('Products',PropertyLookup.get('id'));
+	info propertyData;
+	LeadLookup = bidData.get('Lead');
+	buyerData = zoho.crm.getRecordById('Leads',LeadLookup.get('id'));
+	info buyerData;
+	meetingEventData = Map();
+	cpIDStr = cpID.toString();
+	meetingEventData.put("Channel_Partner_Id",cpIDStr);
+	status = meetingData.get("Visit_Status");
+	info status;
+	if(status == 'Scheduled' || status == 'Visit Scheduled' || status == 'Visit Schedule')
+	{
+		meetingEventData.put("activity_name","cp_buyer_meeting_scheduled");
+	}
+	else
+	{
+		meetingEventData.put("activity_name","cp_buyer_meeting_" + status.toLowerCase());
+	}
+	meetingEventData.put("User_Type","Channel Partner");
+	meetingEventData.put("Meeting_time_start",ifnull(meetingData.get("Start_DateTime"),"NA"));
+	meetingEventData.put("Meeting_created_time",ifnull(meetingData.get("Created_Time"),"NA"));
+	meetingEventData.put("Visit_Rating",ifnull(meetingData.get("Visit_Rating"),"NA"));
+	meetingEventData.put("new_visit_status",ifnull(meetingData.get("Visit_Status"),"NA"));
+	meetingEventData.put("previous_visit_status",ifnull(meetingHistory.get("Visit_Status"),"NA"));
+	meetingEventData.put("bid_stage",ifnull(bidData.get("Stage"),"NA"));
+	meetingEventData.put("bid_source",ifnull(bidData.get("Lead_Source"),"NA"));
+	meetingEventData.put("Dislikes",ifnull(bidData.get("Dislikes"),"NA"));
+	meetingEventData.put("bid_truva_micromarket",ifnull(bidData.get("Truva_Micromarket"),"NA"));
+	meetingEventData.put("no_of_bid_visits",ifnull(bidData.get("No_of_Visits"),"NA"));
+	meetingEventData.put("Property_name",ifnull(propertyData.get("Product_Name"),"NA"));
+	meetingEventData.put("Property_status",ifnull(propertyData.get("Status"),"NA"));
+	meetingEventData.put("Property_category",ifnull(propertyData.get("Product_Category"),"NA"));
+	meetingEventData.put("Unit_Number",ifnull(propertyData.get("Unit"),"NA"));
+	meetingEventData.put("google_maps_link",ifnull(propertyData.get("Google_Maps_Link"),"NA"));
+	meetingEventData.put("cp_deal_type",ifnull(propertyData.get("Deal_Type"),"NA"));
+	meetingEventData.put("buyer_name",ifnull(buyerData.get("Full_Name"),"NA"));
+	meetingEventData.put("buyer_status",ifnull(buyerData.get("Lead_Status"),"NA"));
+	meetingEventData.put("buyer_source",ifnull(buyerData.get("Lead_Source"),"NA"));
+	meetingEventData.put("Tower",null);
+	meetingEventData.put("Society",null);
+	meetingEventData.put("Township",null);
+	towerLookup = propertyData.get("Tower");
+	info "Tower lookup raw value: " + towerLookup;
+	if(towerLookup != null && towerLookup != "")
+	{
+		if(towerLookup.containKey("id"))
+		{
+			towerId = towerLookup.get("id");
+			towerDetails = zoho.crm.getRecordById("Towers",towerId);
+			info "Tower Details: " + towerDetails;
+			if(towerDetails != null)
+			{
+				meetingEventData.put("Tower",ifnull(towerDetails.get("Name"),"NA"));
+				meetingEventData.put("Society",ifnull(towerDetails.get("Society"),"NA"));
+				meetingEventData.put("Township",ifnull(towerDetails.get("Township"),"NA"));
+			}
+		}
+	}
+	info "Final payload:" + meetingEventData;
+	apiEndpoint = "https://qqvnbapdea.execute-api.ap-south-1.amazonaws.com/prod/sandbox-netcore-event";
+	response = invokeurl
+	[
+		url :apiEndpoint
+		type :POST
+		parameters:meetingEventData.toString()
+		headers:{"Content-Type":"application/json"}
+	];
+	info response;
+	if(response != null)
+	{
+		info "Webhook sent successfully for Meeting ID: " + meetingID;
+	}
+	else
+	{
+		info "Failed to send webhook for Meeting ID: " + meetingID;
+	}
+}
+}
