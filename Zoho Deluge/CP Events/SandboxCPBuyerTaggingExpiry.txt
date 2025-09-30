@@ -1,0 +1,35 @@
+void automation.SandboxCPBuyerTaggingExpiry(Int leadID)
+{
+info "Lead ID: " + leadID;
+leadData = zoho.crm.getRecordById("Leads",leadID);
+if(leadData == null)
+{
+	info "No Leads found for ID: " + leadID;
+	return;
+}
+webhookPayload = Map();
+Channel_Partner = leadData.get("Channel_Partner");
+if(Channel_Partner != null)
+{
+	if(Channel_Partner.containKey("id"))
+	{
+		cpId = Channel_Partner.get("id");
+		cpIdStr = cpId.toString();
+		webhookPayload.put("Channel_Partner_Id",cpIdStr);
+	}
+}
+webhookPayload.put("buyer_name",ifnull(leadData.get("Full_Name"),""));
+webhookPayload.put("tag_expiry_date",ifnull(leadData.get("Tag_Expiry_Date"),""));
+webhookPayload.put("activity_name","buyer_lead_expiry_notification");
+webhookPayload.put("User_Type","Channel Partner");
+info webhookPayload;
+apiendpoint = "https://qqvnbapdea.execute-api.ap-south-1.amazonaws.com/prod/sandbox-netcore-event";
+resp = invokeurl
+[
+	url :apiendpoint
+	type :POST
+	parameters:webhookPayload.toString()
+	headers:{"Content-Type":"application/json"}
+];
+info "API Gateway response: " + resp;
+}

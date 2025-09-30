@@ -1,0 +1,105 @@
+void automation.Netcore_Init_Visit_Event(Int meetingID)
+{
+API_ENDPOINT = "https://1unsvm1tw6.execute-api.ap-south-1.amazonaws.com/netcore/cp-update-event";
+meetingData = zoho.crm.getRecordById("Events",meetingID);
+info meetingData;
+ProcessingCount = ifnull(meetingData.get("Processing_Count"),0);
+module = meetingData.get('Module');
+if(module == "Bid")
+{
+	WhatID = meetingData.get('What_Id');
+	if(WhatID == null)
+	{
+		info "What_Id is null, skipping processing.";
+		return;
+	}
+	BidId = WhatID.get('id');
+	BidCompleteData = zoho.crm.getRecordById('Potentials',BidId);
+	PropertyObj = BidCompleteData.get('Products');
+	CompletePropertyObj = zoho.crm.getRecordById('Products',PropertyObj.get('id'));
+	LeadObj = BidCompleteData.get('Lead');
+	LeadID = LeadObj.get('id');
+	meetingEventData = Map();
+	status = meetingData.get("Visit_Status");
+	info status;
+	if(status == 'Scheduled')
+	{
+		meetingEventData.put("activity_name","meeting_created");
+	}
+	else
+	{
+		meetingEventData.put("activity_name","meeting_" + status.toLowerCase());
+	}
+	Owner = meetingData.get('Owner');
+	TruvaRM = Owner.get('name');
+	meetingEventData.put("Lead_Id",ifnull(LeadID,"NA"));
+	meetingEventData.put("Meeting Record Id",ifnull(meetingID.toString(),"NA"));
+	meetingEventData.put("Meeting Title",ifnull(meetingData.get("Event_Title"),"NA"));
+	meetingEventData.put("Meeting Created Time",ifnull(meetingData.get("Created_Time"),"NA"));
+	meetingEventData.put("Meeting time start",ifnull(meetingData.get("Start_DateTime"),"NA"));
+	meetingEventData.put("Meeting time end",ifnull(meetingData.get("End_DateTime"),"NA"));
+	meetingEventData.put("Meeting Location",ifnull(meetingData.get("End_DateTime"),"NA"));
+	meetingEventData.put("Meeting Location",ifnull(meetingData.get("Venue"),"NA"));
+	meetingEventData.put("Visit Status",ifnull(status,"NA"));
+	meetingEventData.put("Truva RM",ifnull(TruvaRM,"NA"));
+	meetingEventData.put("Truva Micromarket",ifnull(meetingData.get("Truva_Micromarket"),"NA"));
+	meetingEventData.put("Visit Rating",ifnull(meetingData.get("Visit_Rating"),"NA"));
+	//Mapping Bid Data
+	Source = BidCompleteData.get("Lead");
+	BidOwner = BidCompleteData.get("Owner");
+	ChannelPartner = BidCompleteData.get("Account_Name");
+	if(ChannelPartner != null)
+	{
+		CompleteChannelPartnerData = zoho.crm.getRecordById('Accounts',ChannelPartner.get('id'));
+		// 	info CompleteChannelPartnerData;
+	}
+	meetingEventData.put("Bid Id",ifnull(BidCompleteData.get("id"),"NA"));
+	meetingEventData.put("Bid Name",ifnull(BidCompleteData.get("Deal_Name"),"NA"));
+	meetingEventData.put("Bid Stage",ifnull(BidCompleteData.get("Stage"),"NA"));
+	meetingEventData.put("Bid Source",if(Source != null && Source.get("name") != null,Source.get("name"),"NA"));
+	meetingEventData.put("Bid Owner",BidOwner.get('name'));
+	meetingEventData.put("Bid Next Steps",ifnull(BidCompleteData.get("Next_steps"),"NA"));
+	meetingEventData.put("Bid CP Tagging Status",ifnull(BidCompleteData.get("CP_Tagging_Status"),"NA"));
+	meetingEventData.put("CP Deal Type",ifnull(BidCompleteData.get("Deal_Type"),"NA"));
+	meetingEventData.put("Buyer CP TruPartner Attribution",ifnull(BidCompleteData.get("TruPartner_Attribution"),false));
+	meetingEventData.put("Channel Partner Name",if(ChannelPartner != null,ifnull(CompleteChannelPartnerData.get("Contact_name"),"NA"),"NA"));
+	meetingEventData.put("Tag Expiry Date",ifnull(BidCompleteData.get("Tag_Expiry_Date"),"NA"));
+	meetingEventData.put("Bid Created Time",ifnull(BidCompleteData.get("Created_Time"),"NA"));
+	meetingEventData.put("Bid Truva Micromarket",ifnull(BidCompleteData.get("Truva_Micromarket"),"NA"));
+	meetingEventData.put("Dislikes",if(BidCompleteData.get("Dislikes") != null && BidCompleteData.get("Dislikes").size() > 0,BidCompleteData.get("Dislikes").size(),"NA"));
+	meetingEventData.put("Number of Bid Visits",ifnull(BidCompleteData.get("No_of_Visits"),"NA"));
+	//Mapping Property Data
+	Society_Partner = CompletePropertyObj.get("Society_Partner");
+	Tower = CompletePropertyObj.get("Tower");
+	TowerDetail = if(Tower != null,zoho.crm.getRecordById("Towers",Tower.get("id")),null);
+	// 	info TowerDetail;
+	meetingEventData.put("Property Name",ifnull(CompletePropertyObj.get("Product_Name"),"NA"));
+	meetingEventData.put("Unit Number",ifnull(CompletePropertyObj.get("Unit"),"NA"));
+	meetingEventData.put("Tower",if(TowerDetail != null,ifnull(TowerDetail.get("Tower"),"NA"),"NA"));
+	meetingEventData.put("Society",if(TowerDetail != null,ifnull(TowerDetail.get("Society"),"NA"),"NA"));
+	meetingEventData.put("Township",if(TowerDetail != null,ifnull(TowerDetail.get("Township"),"NA"),"NA"));
+	meetingEventData.put("Property Status",ifnull(CompletePropertyObj.get("Status"),"NA"));
+	meetingEventData.put("Acq Status",ifnull(CompletePropertyObj.get("Acq_Status"),"NA"));
+	meetingEventData.put("Property Source",ifnull(CompletePropertyObj.get("Seller_Source"),"NA"));
+	meetingEventData.put("Property Category",ifnull(CompletePropertyObj.get("Product_Category"),"NA"));
+	meetingEventData.put("Property Priority",ifnull(CompletePropertyObj.get("Priority"),"NA"));
+	meetingEventData.put("Truva RM",ifnull(TruvaRM,"NA"));
+	meetingEventData.put("Go Live Date",ifnull(CompletePropertyObj.get("Go_Live_Date"),"NA"));
+	meetingEventData.put("Property Total No of Visits",ifnull(CompletePropertyObj.get("Total_No_of_Visits"),0));
+	meetingEventData.put("Visits Last Week",ifnull(CompletePropertyObj.get("Visits_Last_Week"),0));
+	meetingEventData.put("Google Maps Link",ifnull(CompletePropertyObj.get("Google_Maps_Link"),"NA"));
+	info meetingEventData;
+	resp = invokeurl
+	[
+		url :API_ENDPOINT
+		type :POST
+		parameters:meetingEventData.toString()
+		headers:{"Content-Type":"application/json"}
+	];
+	info resp;
+}
+else
+{
+	info "Module is not Bid, skipping execution.";
+}
+}

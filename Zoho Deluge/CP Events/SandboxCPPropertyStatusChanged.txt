@@ -1,0 +1,119 @@
+void automation.SandboxCPPropertyStatusChanged1(Int propertyID,String propertyHistory)
+{
+info "Property ID: " + propertyID;
+info "propertyHistory: " + propertyHistory;
+propertyData = zoho.crm.getRecordById("Products",propertyID);
+info propertyData;
+if(propertyData == null)
+{
+	info "No Property found for ID: " + propertyID;
+	return;
+}
+webhookPayload = Map();
+channelpartnerLookup = ifnull(propertyData.get("Account_Name"),null);
+info "Channel Partner lookup raw value: " + channelpartnerLookup;
+if(channelpartnerLookup != null && channelpartnerLookup != "" && channelpartnerLookup.containKey("id"))
+{
+	channelpartnerId = ifnull(channelpartnerLookup.get("id"),"");
+	info "Channel Partner ID: " + channelpartnerId;
+	if(channelpartnerId != "")
+	{
+		channelpartnerDetails = zoho.crm.getRecordById("Accounts",channelpartnerId);
+		info "Channel Partner Details: " + channelpartnerDetails;
+		if(channelpartnerDetails != null)
+		{
+			info "Channel partner data fetched successfully";
+			webhookPayload.put("Channel_Partner_Id",channelpartnerId);
+			info "Channel Partner ID: " + channelpartnerId;
+		}
+		else
+		{
+			info "Failed to fetch CP data by channelpartnerId: " + channelpartnerId;
+			webhookPayload.put("channelpartnerId","NA");
+		}
+	}
+}
+else
+{
+	info "Channel Partner lookup missing or invalid; leaving CP fields as NA";
+	webhookPayload.put("channelpartnerId","NA");
+}
+currentStatus = ifnull(propertyData.get("Status"),"");
+previousStatus = ifnull(propertyHistory.get("Status"),"");
+info "Previous Status: " + previousStatus;
+info "Current Status: " + currentStatus;
+propertyIdStr = propertyID.toString();
+webhookPayload.put("previous_status",previousStatus);
+webhookPayload.put("new_status",currentStatus);
+webhookPayload.put("activity_name","property_Status_changed");
+webhookPayload.put("User_Type","Channel Partner");
+webhookPayload.put("Property_Name",propertyData.get("Product_Name"));
+webhookPayload.put("Acq_Status",propertyData.get("Acq_Status"));
+webhookPayload.put("Property_Source",propertyData.get("Source"));
+webhookPayload.put("Property_Category",propertyData.get("Product_Category"));
+webhookPayload.put("Property_Priority",propertyData.get("Priority"));
+webhookPayload.put("Unit_Number",propertyData.get("Unit"));
+webhookPayload.put("Truva_RM",propertyData.get("Owner"));
+TruvaRm = ifnull(propertyData.get("Owner"),null);
+webhookPayload.put("Truva_RM",ifnull(TruvaRm.get("name"),"NA"));
+TowerName = propertyData.get("Tower");
+if(TowerName != null && TowerName != "")
+{
+	webhookPayload.put("Tower_Name",TowerName.get("name"));
+}
+else
+{
+	info "Tower field is empty, skipping";
+}
+SellerName = propertyData.get("Seller");
+if(SellerName != null && SellerName != "")
+{
+	webhookPayload.put("Seller",SellerName.get("name"));
+}
+else
+{
+	webhookPayload.put("Seller","NA");
+}
+towerLookup = ifnull(propertyData.get("Tower"),null);
+info "tower lookup raw value: " + towerLookup;
+if(towerLookup != null && towerLookup != "" && towerLookup.containKey("id"))
+{
+	towerId = ifnull(towerLookup.get("id"),"");
+	info "Tower ID: " + towerId;
+	if(towerId != "")
+	{
+		towerDetails = zoho.crm.getRecordById("Towers",towerId);
+		info "Tower Details: " + towerDetails;
+		if(towerDetails != null)
+		{
+			info "Tower data fetched successfully";
+			webhookPayload.put("Society",ifnull(towerDetails.get("Society"),"NA"));
+			webhookPayload.put("Township",ifnull(towerDetails.get("Township"),"NA"));
+			info "Society Name: " + ifnull(towerDetails.get("Society"),"NA");
+			info "Township:-  " + ifnull(towerDetails.get("Township"),"NA");
+		}
+		else
+		{
+			info "Failed to fetch Tower data by towerId: " + towerId;
+			webhookPayload.put("Society","NA");
+			webhookPayload.put("Township","NA");
+		}
+	}
+}
+else
+{
+	info "Tower lookup missing or invalid; leaving Tower fields as NA";
+	webhookPayload.put("Society","NA");
+	webhookPayload.put("Township","NA");
+}
+info webhookPayload;
+apiendpoint = "https://qqvnbapdea.execute-api.ap-south-1.amazonaws.com/prod/sandbox-netcore-event";
+resp = invokeurl
+[
+	url :apiendpoint
+	type :POST
+	parameters:webhookPayload.toString()
+	headers:{"Content-Type":"application/json"}
+];
+info "API Gateway response: " + resp;
+}

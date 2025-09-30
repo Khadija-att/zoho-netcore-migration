@@ -1,0 +1,44 @@
+void automation.SandboxOnCPDeletion(int cpID)
+{
+info "Processing CP ID: " + cpID;
+cpData = zoho.crm.getRecordById("Accounts",cpID);
+info cpData;
+try 
+{
+	if(cpData == null)
+	{
+		info "Failed to fetch CP data - CP Data is null";
+		return;
+	}
+	info "CP data fetched successfully";
+	cpIdStr = cpID.toString();
+	webhookPayload = Map();
+	webhookPayload.put("Channel_Partner_Id",cpIdStr);
+	webhookPayload.put("Is_Active","false");
+	webhookPayload.put("User_Type","Channel Partner");
+	webhookPayload.put("Created_Time",cpData.get("Created_Time"));
+	webhookPayload.put("Modified_Time",cpData.get("Modified_Time"));
+	info webhookPayload;
+	apiendpoint = "https://qqvnbapdea.execute-api.ap-south-1.amazonaws.com/prod/sandbox-netcore-sync";
+	response = invokeurl
+	[
+		url :apiendpoint
+		type :POST
+		parameters:webhookPayload.toString()
+		headers:{"Content-Type":"application/json"}
+	];
+	info "API Response: " + response;
+	if(response != null)
+	{
+		info "Webhook sent successfully for CP ID: " + cpID;
+	}
+	else
+	{
+		info "Failed to send webhook for CP ID: " + cpID;
+	}
+}
+catch (error)
+{
+	info "error: " + error;
+}
+}

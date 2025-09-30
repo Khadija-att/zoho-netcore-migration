@@ -1,0 +1,25 @@
+void schedule.SandboxWeeklyPropertyUpdate()
+{
+props = zoho.crm.searchRecords("Products","(Status:equals:Live)");
+info props;
+for each  p in props
+{
+	propertyID = p.get("id");
+	propertyIdStr = propertyID.toString();
+	webhookPayload = Map();
+	webhookPayload.put("Property_Id",propertyIdStr);
+	webhookPayload.put("Total_No_of_Visits",p.get("Total_No_of_Visits"));
+	webhookPayload.put("Visits_Last_Week",p.get("Visits_Last_Week"));
+	webhookPayload.put("activity_name","weekly_seller_property_update");
+	webhookPayload.put("User_Type","Property");
+	info webhookPayload;
+	resp = invokeurl
+	[
+		url :"https://qqvnbapdea.execute-api.ap-south-1.amazonaws.com/prod/sandbox-netcore-event"
+		type :POST
+		parameters:webhookPayload.toString()
+		headers:{"Content-Type":"application/json"}
+	];
+	info "API Gateway response:" + resp;
+}
+}

@@ -1,0 +1,127 @@
+void automation.SandboxBuyerSyncFunction(Int leadId)
+{
+info "Processing Lead ID: " + leadId;
+leadData = zoho.crm.getRecordById("Leads",leadId);
+info leadData;
+try 
+{
+	if(leadData == null)
+	{
+		info "Failed to fetch Lead data - leadData is null";
+		return;
+	}
+	info "Lead data fetched successfully";
+	leadIdStr = leadId.toString();
+	webhookPayload = Map();
+	webhookPayload.put("Lead_Id",leadIdStr);
+	webhookPayload.put("Phone",leadData.get("Phone"));
+	webhookPayload.put("Email",leadData.get("Email"));
+	fullName = ifnull(leadData.get("First_Name"),"") + " " + ifnull(leadData.get("Last_Name"),"");
+	webhookPayload.put("Lead_Name",fullName.trim());
+	webhookPayload.put("Lead_Source",leadData.get("Lead_Source"));
+	webhookPayload.put("Lead_Status",leadData.get("Lead_Status"));
+	webhookPayload.put("Is_Active","true");
+	webhookPayload.put("User_Type","Buyer");
+	webhookPayload.put("Previous_Lead_Status",leadData.get("Previous_Lead_Status"));
+	webhookPayload.put("Created_Time",leadData.get("Created_Time"));
+	webhookPayload.put("Modified_Time",leadData.get("Modified_Time"));
+	webhookPayload.put("Duplicate_Status",leadData.get("Duplicate_Status"));
+	webhookPayload.put("Duplicate_Lead",leadData.get("Duplicate_Lead"));
+	owner = leadData.get("Owner");
+	webhookPayload.put("Lead_Owner",owner.get("name"));
+	webhookPayload.put("Priority",leadData.get("Priority"));
+	webhookPayload.put("Listing_Platform",leadData.get("Listing_Platform"));
+	webhookPayload.put("Project_name",leadData.get("Project_name"));
+	webhookPayload.put("Campaign_Name",leadData.get("Form_Name"));
+	webhookPayload.put("Campaign",leadData.get("Campaign_Name"));
+	webhookPayload.put("Ad_set",leadData.get("Ad_set"));
+	webhookPayload.put("Form_ID",leadData.get("Form_ID"));
+	webhookPayload.put("Social_Lead_ID",leadData.get("leadchain0__Social_Lead_ID"));
+	webhookPayload.put("Ad_Name",leadData.get("Ad_Name"));
+	webhookPayload.put("No_Of_attempts",leadData.get("No_Of_attempts"));
+	webhookPayload.put("Interested_in_visit",leadData.get("Interested_in_visit"));
+	webhookPayload.put("Preferences",leadData.get("Preferences"));
+	webhookPayload.put("Use_Case",leadData.get("Use_Case"));
+	webhookPayload.put("Preferred_Area",leadData.get("Preferred_Area"));
+	webhookPayload.put("Current_Stay",leadData.get("Current_Stay"));
+	webhookPayload.put("Budget",leadData.get("Budget"));
+	webhookPayload.put("Preferred_time_of_Visit",leadData.get("Preferred_time_of_Visit"));
+	webhookPayload.put("Not_Qualified_Reason",leadData.get("Not_Qualified_Reason"));
+	webhookPayload.put("Tag_Expiry_Date",leadData.get("Tag_Expiry_Date"));
+	webhookPayload.put("User_Type","Buyer");
+	micromarket = ifnull(leadData.get("Truva_Micromarket"),list());
+	cleanMicromarket = list();
+	for each  item in micromarket
+	{
+		if(item != null && item != "" && item != "null")
+		{
+			cleanMicromarket.add(item);
+		}
+	}
+	webhookPayload.put("Truva_Micromarket",cleanMicromarket);
+	webhookPayload.put("DND",leadData.get("DND"));
+	webhookPayload.put("Referred_by",leadData.get("Referred_by"));
+	webhookPayload.put("Spouse_Name",leadData.get("Spouse_Name"));
+	webhookPayload.put("Spouse_Phone",leadData.get("Spouse_Phone"));
+	webhookPayload.put("CP_Contact_Name",null);
+	webhookPayload.put("CP_Phone",null);
+	webhookPayload.put("CP_Id",null);
+	webhookPayload.put("Company_lookup",null);
+	channelPartnerLookup = leadData.get("Channel_Partner");
+	info "Channel Partner lookup raw value: " + channelPartnerLookup;
+	if(channelPartnerLookup != null && channelPartnerLookup != "")
+	{
+		if(channelPartnerLookup.containKey("id"))
+		{
+			cpId = channelPartnerLookup.get("id");
+			info "Channel Partner ID: " + cpId;
+			cpDetails = zoho.crm.getRecordById("Accounts",cpId);
+			info "CP Details: " + cpDetails;
+			if(cpDetails != null)
+			{
+				info "Channel Partner data fetched successfully";
+				webhookPayload.put("CP_Contact_Name",cpDetails.get("Contact_name"));
+				webhookPayload.put("CP_Phone",cpDetails.get("Phone"));
+				webhookPayload.put("CP_Id",cpId);
+				webhookPayload.put("Company_lookup",cpDetails.get("Company_lookup"));
+				info "Channel Partner Contact Name: " + cpDetails.get("Contact_name");
+				info "Channel Partner Phone: " + cpDetails.get("Phone");
+			}
+			else
+			{
+				info "Failed to fetch Channel Partner data by cpId: " + cpId;
+			}
+		}
+		else
+		{
+			info "Channel Partner lookup exists but 'id' key not found; leaving CP fields null";
+		}
+	}
+	else
+	{
+		info "No Channel Partner linked to this lead — CP fields set to null";
+	}
+	info webhookPayload;
+	apiendpoint = "https://qqvnbapdea.execute-api.ap-south-1.amazonaws.com/prod/sandbox-netcore-sync";
+	response = invokeurl
+	[
+		url :apiendpoint
+		type :POST
+		parameters:webhookPayload.toString()
+		headers:{"Content-Type":"application/json"}
+	];
+	info "API Response: " + response;
+	if(response != null)
+	{
+		info "Webhook sent successfully for Lead ID: " + leadId;
+	}
+	else
+	{
+		info "Failed to send webhook for Lead ID: " + leadId;
+	}
+}
+catch (error)
+{
+	info "error: " + error;
+}
+}

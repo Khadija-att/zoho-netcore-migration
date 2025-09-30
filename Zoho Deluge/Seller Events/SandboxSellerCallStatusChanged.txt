@@ -1,0 +1,32 @@
+void automation.SandboxSellerCallStatusChanged(Int sellerID,String sellerHistory)
+{
+info "Seller ID: " + sellerID;
+info "sellerHistory: " + sellerHistory;
+sellerData = zoho.crm.getRecordById("Sellers",sellerID);
+if(sellerData == null)
+{
+	info "No seller found for ID: " + sellerID;
+	return;
+}
+currentStatus = ifnull(sellerData.get("Call_Status"),"");
+previousStatus = ifnull(sellerHistory.get("Call_Status"),"");
+info "Previous Status: " + previousStatus;
+info "Current Status: " + currentStatus;
+sellerIdStr = sellerID.toString();
+webhookPayload = Map();
+webhookPayload.put("Seller_Id",sellerIdStr);
+webhookPayload.put("previous_status",previousStatus);
+webhookPayload.put("new_status",currentStatus);
+webhookPayload.put("activity_name","seller_call_Status_changed");
+webhookPayload.put("User_Type","Seller");
+info webhookPayload;
+apiendpoint = "https://qqvnbapdea.execute-api.ap-south-1.amazonaws.com/prod/sandbox-netcore-event";
+resp = invokeurl
+[
+	url :apiendpoint
+	type :POST
+	parameters:webhookPayload.toString()
+	headers:{"Content-Type":"application/json"}
+];
+info "API Gateway response: " + resp;
+}

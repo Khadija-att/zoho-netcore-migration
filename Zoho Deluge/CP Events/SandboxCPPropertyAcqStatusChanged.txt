@@ -1,0 +1,107 @@
+void automation.SandboxCPPropertyAcqStatusChanged(Int propertyID,String propertyHistory)
+{
+info "Property ID: " + propertyID;
+info "propertyHistory: " + propertyHistory;
+propertyData = zoho.crm.getRecordById("Products",propertyID);
+info propertyData;
+if(propertyData == null)
+{
+	info "No Property found for ID: " + propertyID;
+	return;
+}
+webhookPayload = Map();
+channelpartnerLookup = ifnull(propertyData.get("Account_Name"),null);
+info "Channel Partner lookup raw value: " + channelpartnerLookup;
+if(channelpartnerLookup != null && channelpartnerLookup != "" && channelpartnerLookup.containKey("id"))
+{
+	channelpartnerId = ifnull(channelpartnerLookup.get("id"),"");
+	info "Channel Partner ID: " + channelpartnerId;
+	if(channelpartnerId != "")
+	{
+		channelpartnerDetails = zoho.crm.getRecordById("Accounts",channelpartnerId);
+		info "Channel Partner Details: " + channelpartnerDetails;
+		if(channelpartnerDetails != null)
+		{
+			info "Channel partner data fetched successfully";
+			webhookPayload.put("Channel_Partner_Id",channelpartnerId);
+			info "Channel Partner ID: " + channelpartnerId;
+		}
+		else
+		{
+			info "Failed to fetch CP data by channelpartnerId: " + channelpartnerId;
+			webhookPayload.put("channelpartnerId","NA");
+		}
+	}
+}
+else
+{
+	info "Channel Partner lookup missing or invalid; leaving CP fields as NA";
+	webhookPayload.put("channelpartnerId","NA");
+}
+currentStatus = ifnull(propertyData.get("Acq_Status"),"");
+previousStatus = ifnull(propertyHistory.get("Acq_Status"),"");
+info "Previous Status: " + previousStatus;
+info "Current Status: " + currentStatus;
+webhookPayload.put("previous_acq_status",previousStatus);
+webhookPayload.put("new_acq_status",currentStatus);
+webhookPayload.put("activity_name","cp_acq_status_changed");
+webhookPayload.put("User_Type","Channel Partner");
+webhookPayload.put("property_Name",propertyData.get("Product_Name"));
+webhookPayload.put("property_Status",propertyData.get("Status"));
+webhookPayload.put("property_Source",propertyData.get("Source"));
+webhookPayload.put("property_Category",propertyData.get("Product_Category"));
+webhookPayload.put("property_Priority",propertyData.get("Priority"));
+webhookPayload.put("unit_Number",propertyData.get("Unit"));
+TruvaRm = ifnull(propertyData.get("Owner"),null);
+webhookPayload.put("Truva_RM",ifnull(TruvaRm.get("name"),"NA"));
+webhookPayload.put("Tower_Name",null);
+TowerName = ifnull(propertyData.get("Tower"),null);
+if(TowerName != null)
+{
+	webhookPayload.put("Tower_Name",ifnull(TowerName.get("name"),"NA"));
+}
+SellerName = ifnull(propertyData.get("Seller"),null);
+webhookPayload.put("seller_name",ifnull(SellerName.get("name"),"NA"));
+towerLookup = ifnull(propertyData.get("Tower"),null);
+info "tower lookup raw value: " + towerLookup;
+if(towerLookup != null && towerLookup != "" && towerLookup.containKey("id"))
+{
+	towerId = ifnull(towerLookup.get("id"),"");
+	info "Tower ID: " + towerId;
+	if(towerId != "")
+	{
+		towerDetails = zoho.crm.getRecordById("Towers",towerId);
+		info "Tower Details: " + towerDetails;
+		if(towerDetails != null)
+		{
+			info "Tower data fetched successfully";
+			webhookPayload.put("Society",ifnull(towerDetails.get("Society"),"NA"));
+			webhookPayload.put("Township",ifnull(towerDetails.get("Township"),"NA"));
+			info "Society Name: " + ifnull(towerDetails.get("Society"),"NA");
+			info "Township:-  " + ifnull(towerDetails.get("Township"),"NA");
+		}
+		else
+		{
+			info "Failed to fetch Tower data by towerId: " + towerId;
+			webhookPayload.put("Society","NA");
+			webhookPayload.put("Township","NA");
+		}
+	}
+}
+else
+{
+	info "Tower lookup missing or invalid; leaving Tower fields as NA";
+	webhookPayload.put("Society","NA");
+	webhookPayload.put("Township","NA");
+}
+info webhookPayload;
+apiendpoint = "https://qqvnbapdea.execute-api.ap-south-1.amazonaws.com/prod/sandbox-netcore-event";
+resp = invokeurl
+[
+	url :apiendpoint
+	type :POST
+	parameters:webhookPayload.toString()
+	headers:{"Content-Type":"application/json"}
+];
+info "API Gateway response: " + resp;
+}

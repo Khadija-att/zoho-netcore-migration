@@ -1,0 +1,181 @@
+void automation.SandboxPropertiesSyncFunction(Int propertyID)
+{
+info "Processing Property ID: " + propertyID;
+propertyData = zoho.crm.getRecordById("Products",propertyID);
+info "Property: " + propertyData;
+if(propertyData == null)
+{
+	info "Failed to fetch Property data - propertyData is null";
+	return;
+}
+info "Property data fetched successfully";
+webhookPayload = Map();
+webhookPayload.put("Property_Id",propertyID.toString());
+webhookPayload.put("Property_Name",propertyData.get("Product_Name"));
+webhookPayload.put("Property_Source",propertyData.get("Source"));
+webhookPayload.put("Property_Status",propertyData.get("Status"));
+webhookPayload.put("Referror",null);
+ReferrorLookup = propertyData.get("Referror_Name");
+if(ReferrorLookup != null && ReferrorLookup != "")
+{
+	Refid = ReferrorLookup.get("id");
+	Referror = zoho.crm.getRecordById("Referral",Refid);
+	webhookPayload.put("Referror",Referror.get("Name"));
+}
+webhookPayload.put("User_Type","Property");
+webhookPayload.put("Unit_Number",propertyData.get("Unit"));
+webhookPayload.put("Truva_RM",null);
+owner = propertyData.get("Owner");
+if(owner != null && owner != "")
+{
+	webhookPayload.put("Truva_RM",owner.get("name"));
+}
+webhookPayload.put("Priority",propertyData.get("Priority"));
+webhookPayload.put("Created_Time",propertyData.get("Created_Time"));
+webhookPayload.put("Modified_Time",propertyData.get("Modified_Time"));
+webhookPayload.put("Product_Category",propertyData.get("Product_Category"));
+webhookPayload.put("Truva_Micromarket",propertyData.get("Truva_Micromarket"));
+webhookPayload.put("Property_Seller_Source",propertyData.get("Seller_Source"));
+webhookPayload.put("Visit_Date",propertyData.get("Visit_Date"));
+webhookPayload.put("Visit_by",null);
+visitBy = propertyData.get("Visit_by");
+if(visitBy != null)
+{
+	webhookPayload.put("Visit_by",visitBy.get("name"));
+}
+webhookPayload.put("Go_Live_Date",propertyData.get("Go_Live_Date"));
+webhookPayload.put("Explore_Later_On",propertyData.get("Explore_Later_On"));
+webhookPayload.put("Seller_Profile",propertyData.get("Seller_Profile"));
+webhookPayload.put("Likelihood",propertyData.get("Likelihood"));
+webhookPayload.put("Acq_Status",propertyData.get("Acq_Status"));
+webhookPayload.put("Proposal_Link",propertyData.get("Proposal_Link"));
+webhookPayload.put("Offer_Date",propertyData.get("Offer_Date"));
+webhookPayload.put("Deal_Closed_Date",propertyData.get("Kill_Date"));
+webhookPayload.put("Customer_Rejection_Reason",propertyData.get("Rejection_Bucket"));
+webhookPayload.put("Seller_Interaction_Date",propertyData.get("Seller_Interaction"));
+webhookPayload.put("Truva_Rejection_reason",propertyData.get("Truva_Rejection_reason"));
+webhookPayload.put("Offer_Revision",propertyData.get("Offer_Revision"));
+webhookPayload.put("Date_of_Recycle",propertyData.get("Date_of_Recycle"));
+webhookPayload.put("Possession_Date",propertyData.get("Possession_Date"));
+webhookPayload.put("Deal_Type",propertyData.get("Deal_Type"));
+webhookPayload.put("Tag_Expiry_Date",propertyData.get("Tag_Expiry_Date"));
+webhookPayload.put("CP_Tagging_Status",propertyData.get("CP_Tagging_Status"));
+webhookPayload.put("Seller_MoU_Signing_Date",propertyData.get("Seller_MoU_Signing_Date"));
+webhookPayload.put("Buyer_MoU_Signing_Date",propertyData.get("Buyer_MoU_Signing_Date"));
+webhookPayload.put("Tri_Party_MOU",propertyData.get("Tri_Party_MOU"));
+webhookPayload.put("Exclusivity_Agreement",propertyData.get("Exclusivity_Agreement"));
+webhookPayload.put("Is_Active","true");
+webhookPayload.put("Tower",null);
+webhookPayload.put("Society",null);
+webhookPayload.put("Township",null);
+towerLookup = propertyData.get("Tower");
+info towerLookup;
+info "Tower lookup raw value: " + towerLookup;
+if(towerLookup != null && towerLookup != "")
+{
+	if(towerLookup.containKey("id"))
+	{
+		towerId = towerLookup.get("id");
+		towerDetails = zoho.crm.getRecordById("Towers",towerId);
+		info "Tower Details: " + towerDetails;
+		if(towerDetails != null)
+		{
+			webhookPayload.put("Tower",towerDetails.get("Name"));
+			webhookPayload.put("Society",towerDetails.get("Society"));
+			webhookPayload.put("Township",towerDetails.get("Township"));
+		}
+	}
+}
+webhookPayload.put("Acq_Channel_Partner_Name",null);
+webhookPayload.put("Acq_Channel_Partner_Number",null);
+channelPartnerLookup = propertyData.get("Account_Name");
+info "Channel Partner lookup raw value: " + channelPartnerLookup;
+if(channelPartnerLookup != null && channelPartnerLookup != "")
+{
+	if(channelPartnerLookup.containKey("id"))
+	{
+		cpId = channelPartnerLookup.get("id");
+		cpDetails = zoho.crm.getRecordById("Accounts",cpId);
+		info "CP Details: " + cpDetails;
+		if(cpDetails != null)
+		{
+			webhookPayload.put("Acq_Channel_Partner_Name",cpDetails.get("Contact_name"));
+			webhookPayload.put("Acq_Channel_Partner_Number",cpDetails.get("Phone"));
+		}
+	}
+}
+webhookPayload.put("Acq_Society_Partner_Name",null);
+webhookPayload.put("Acq_Society_Partner_Number",null);
+societyPartnerLookup = propertyData.get("Society_Partner");
+info "Society Partner lookup raw value: " + societyPartnerLookup;
+if(societyPartnerLookup != null && societyPartnerLookup != "")
+{
+	if(societyPartnerLookup.containKey("id"))
+	{
+		spId = societyPartnerLookup.get("id");
+		spDetails = zoho.crm.getRecordById("Society_Partners",spId);
+		info "SP Details: " + spDetails;
+		if(spDetails != null)
+		{
+			webhookPayload.put("Acq_Society_Partner_Name",spDetails.get("Name"));
+			webhookPayload.put("Acq_Society_Partner_Number",spDetails.get("Phone"));
+		}
+	}
+}
+sellerLookup = propertyData.get("Seller");
+if(sellerLookup != null && sellerLookup != "")
+{
+	if(sellerLookup.containKey("id"))
+	{
+		sellerId = sellerLookup.get("id");
+		sellerData = zoho.crm.getRecordById("Sellers",sellerId);
+		info "Seller Details: " + sellerData;
+		if(sellerData != null)
+		{
+			info "Seller data fetched successfully";
+			webhookPayload.put("Phone_Number",sellerData.get("Phone_Number"));
+			webhookPayload.put("First_Name",sellerData.get("First_Name"));
+			webhookPayload.put("Last_Name",sellerData.get("Last_Name"));
+			webhookPayload.put("Email",sellerData.get("Email"));
+			webhookPayload.put("Name",sellerData.get("Name"));
+			webhookPayload.put("User_Source",sellerData.get("Seller_Source"));
+			webhookPayload.put("User_CTA",sellerData.get("Channel"));
+			webhookPayload.put("Call_Status",sellerData.get("Call_Status"));
+			webhookPayload.put("Property_Created",sellerData.get("Property_Created"));
+			webhookPayload.put("Reason_for_not_Truva_Qualified",sellerData.get("Truva_Qualified"));
+			webhookPayload.put("Spouse_Name",sellerData.get("Spouse_Name"));
+			webhookPayload.put("Spouse_Phone_Number",sellerData.get("Spouse_Phone_Number"));
+			webhookPayload.put("Secondary_Email",sellerData.get("Secondary_Email"));
+			webhookPayload.put("Call_Attempts",sellerData.get("Call_Attempts"));
+			webhookPayload.put("Reason_for_lead_drop",sellerData.get("Reason_for_Lead_Drop"));
+			webhookPayload.put("Follow_Up_on",sellerData.get("Follow_up_on"));
+			webhookPayload.put("DND",sellerData.get("DND"));
+			webhookPayload.put("Last_Called_on",sellerData.get("Call_Updates"));
+			webhookPayload.put("Periscope_Sent",sellerData.get("Periscope_Sent1"));
+			webhookPayload.put("Periscope_Status",sellerData.get("Periscope_Status"));
+			webhookPayload.put("Campaign_Name",sellerData.get("Campaign_Name"));
+			webhookPayload.put("Campaign_Source",sellerData.get("Campaign_Source"));
+			webhookPayload.put("Adset_Name",sellerData.get("Adset_Name"));
+			webhookPayload.put("Ad_Name",sellerData.get("Ad_Name"));
+		}
+	}
+}
+info "Final payload:" + webhookPayload;
+apiEndpoint = "https://qqvnbapdea.execute-api.ap-south-1.amazonaws.com/prod/sandbox-netcore-sync";
+response = invokeurl
+[
+	url :apiEndpoint
+	type :POST
+	parameters:webhookPayload.toString()
+	headers:{"Content-Type":"application/json"}
+];
+info response;
+if(response != null)
+{
+	info "Webhook sent successfully for Property ID: " + propertyID;
+}
+else
+{
+	info "Failed to send webhook for Property ID: " + propertyID;
+}
+}

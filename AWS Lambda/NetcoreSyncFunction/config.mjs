@@ -1,0 +1,35 @@
+const ENV = process.env.NODE_ENV || "DEV";
+
+const baseConfig = {
+  AWS_REGION_MUMBAI: process.env.AWS_REGION_MUMBAI,
+  BUCKET_PROCESSED: process.env.BUCKET_PROCESSED,
+  BUCKET_RAW: process.env.BUCKET_RAW,
+  NETCORE_CONTACT_URL: process.env.NETCORE_CONTACT_URL,
+  NETCORE_EVENT_URL: process.env.NETCORE_EVENT_URL,
+};
+
+const envConfig = {
+  DEV: {
+    BUYER_ASSET_ID: process.env.DEV_BUYER_ASSET_ID,
+    BUYER_NETCORE_API_KEY: process.env.DEV_BUYER_NETCORE_API_KEY,
+    SELLER_ASSET_ID: process.env.DEV_SELLER_ASSET_ID,
+    SELLER_NETCORE_API_KEY: process.env.DEV_SELLER_NETCORE_API_KEY,
+    CHANNEL_PARTNER_NETCORE_API_KEY: process.env.DEV_CHANNEL_PARTNER_NETCORE_API_KEY,
+    CHANNEL_PARTNER_ASSET_ID: process.env.DEV_CHANNEL_PARTNER_ASSET_ID,
+  },
+  PROD: {
+    BUYER_ASSET_ID: process.env.PROD_BUYER_ASSET_ID,
+    BUYER_NETCORE_API_KEY: process.env.PROD_BUYER_NETCORE_API_KEY,
+    SELLER_ASSET_ID: process.env.PROD_SELLER_ASSET_ID,
+    SELLER_NETCORE_API_KEY: process.env.PROD_SELLER_NETCORE_API_KEY,
+    CHANNEL_PARTNER_NETCORE_API_KEY: process.env.PROD_CHANNEL_PARTNER_NETCORE_API_KEY,
+    CHANNEL_PARTNER_ASSET_ID: process.env.PROD_CHANNEL_PARTNER_ASSET_ID,
+  },
+};
+
+const config = {
+  ...baseConfig,
+  ...(envConfig[ENV] || envConfig.DEV),
+};
+
+export default config;

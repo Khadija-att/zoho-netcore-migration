@@ -1,0 +1,234 @@
+void automation.Netcore_Calculate_Fields(Int meetingID)
+{
+API_ENDPOINT = "https://1unsvm1tw6.execute-api.ap-south-1.amazonaws.com/netcore/netcore-buyer";
+completedStatuses = list();
+completedStatuses.add("Visit Complete");
+meetingData = zoho.crm.getRecordById("Events",meetingID);
+info "Meeting fetched: " + meetingData;
+if(meetingData == null)
+{
+	info "No meeting found for ID: " + meetingID.toString();
+	return;
+}
+module = meetingData.get("Module");
+if(module != "Bid")
+{
+	info "Module is not Bid. Skipping calculation.";
+	return;
+}
+WhatID = meetingData.get("What_Id");
+if(WhatID == null)
+{
+	info "No What_Id found on meeting; cannot resolve Bid.";
+	return;
+}
+BidId = WhatID.get("id");
+if(BidId == null)
+{
+	info "No Bid ID present in What_Id.";
+	return;
+}
+BidCompleteData = zoho.crm.getRecordById("Potentials",BidId);
+info "Bid fetched: " + BidCompleteData;
+if(BidCompleteData == null)
+{
+	info "Bid record not found for ID: " + BidId;
+	return;
+}
+LeadObj = BidCompleteData.get("Lead");
+if(LeadObj == null || LeadObj.get("id") == null)
+{
+	info "No Lead linked to this Bid. Cannot proceed.";
+	return;
+}
+LeadID = LeadObj.get("id").toString();
+info "Linked Lead ID: " + LeadID;
+leadData = zoho.crm.getRecordById("Leads",LeadID);
+info "Lead: " + leadData;
+status = meetingData.get("Visit_Status");
+if(!completedStatuses.contains(status))
+{
+	info "Triggered meeting Visit_Status (" + status + ") is not a completed status. Continuing only if you want recalculation on any change.";
+	// If you want to still recalc on any status change, comment out the following return:
+	// return;
+}
+// --- Fetch all Bids for the identified Lead ---
+bidsList = zoho.crm.searchRecords("Potentials","(Lead:equals:" + LeadID + ")");
+info bidsList;
+if(bidsList == null || bidsList.size() == 0)
+{
+	// fallback attempt
+	bidsList = zoho.crm.searchRecords("Potentials","(Lead.id:equals:" + LeadID + ")");
+}
+if(bidsList == null || bidsList.size() == 0)
+{
+	// Last fallback: scan recent Potentials (only use if Potentials count is small)
+	info "No Potentials found via searchRecords for Lead. Attempting to fetch recent Potentials (may be heavy).";
+	allBids = zoho.crm.getRecords("Potentials",1,200);
+	bidsList = list();
+	if(allBids != null)
+	{
+		for each  rb in allBids
+		{
+			rLead = rb.get("Lead");
+			if(rLead != null && rLead.get("id") != null && rLead.get("id").toString() == LeadID)
+			{
+				bidsList.add(rb);
+			}
+		}
+	}
+}
+info "Total bids found for lead: " + ifnull(bidsList.size(),0);
+// Collect distinct properties and find latest completed visit datetime
+distinctProperties = list();
+// simple set using list + contains()
+latestVisit = null;
+// will hold ISO-like datetime string (max lexicographically for ISO)
+latestVisitEpoch = 0;
+// if you prefer to parse to epoch, replace comparisons with explicit parsing to datetime.
+for each  bidRec in bidsList
+{
+	currentBidId = bidRec.get("id");
+	if(currentBidId == null)
+	{
+		continue;
+	}
+	currentBidIdStr = currentBidId.toString();
+	// Fetch Events for this bid (we'll filter by status in-code to be flexible)
+	eventsCriteria = "(What_Id:equals:" + currentBidIdStr + ")";
+	eventsForBid = zoho.crm.searchRecords("Events",eventsCriteria);
+	// If searchRecords returns null/empty, skip gracefully
+	if(eventsForBid == null || eventsForBid.size() == 0)
+	{
+		continue;
+	}
+	// If this bid has at least one completed meeting -> qualifies for property counting
+	bidHasCompletedMeeting = false;
+	for each  e in eventsForBid
+	{
+		eStatus = e.get("Visit_Status");
+		// Normalize nulls
+		if(eStatus == null)
+		{
+			eStatus = "";
+		}
+		// Check completed status membership
+		if(completedStatuses.contains(eStatus))
+		{
+			bidHasCompletedMeeting = true;
+			// --- Determine event datetime (prefer "From", fallback to "Start_DateTime") ---
+			evtFrom = null;
+			if(e.containsKey("From") && e.get("From") != null)
+			{
+				evtFrom = e.get("From").toString();
+			}
+			else if(e.containsKey("Start_DateTime") && e.get("Start_DateTime") != null)
+			{
+				evtFrom = e.get("Start_DateTime").toString();
+			}
+			else if(e.containsKey("From_Date") && e.get("From_Date") != null)
+			{
+				// extra fallback
+				evtFrom = e.get("From_Date").toString();
+			}
+			// Update latestVisit if this event is newer
+			if(evtFrom != null)
+			{
+				// Assumes CRM returns ISO-compatible datetime strings (YYYY-MM-DDTHH:MM:SS...).
+				// Lexicographic comparison works if ISO format is returned. If not, replace with explicit parsing.
+				evtDt = evtFrom.toDateTime();
+				// returns a DATE-TIME
+				evtEpoch = evtDt.toLong();
+				if(latestVisit == null || evtEpoch > latestVisitEpoch)
+				{
+					latestVisit = evtFrom;
+					latestVisitEpoch = evtEpoch;
+				}
+			}
+		}
+	}
+	// end events loop
+	// If the bid qualifies (has at least one completed meeting) -> collect property from Bid
+	if(bidHasCompletedMeeting)
+	{
+		propertyObj = bidRec.get("Products");
+		// adjust API name if product/property is stored under different key
+		if(propertyObj != null)
+		{
+			propId = propertyObj.get("id");
+			if(propId != null)
+			{
+				pid = propId.toString();
+				if(!distinctProperties.contains(pid))
+				{
+					distinctProperties.add(pid);
+				}
+			}
+			else
+			{
+				propName = propertyObj.get("name");
+				if(propName != null && !distinctProperties.contains(propName.toString()))
+				{
+					distinctProperties.add(propName.toString());
+				}
+			}
+		}
+		else
+		{
+			for each  e2 in eventsForBid
+			{
+				eStatus2 = e2.get("Visit_Status");
+				if(eStatus2 != null && completedStatuses.contains(eStatus2))
+				{
+					// replace "Property" with your actual event field API name that references property
+					evtProperty = e2.get("Property");
+					if(evtProperty != null)
+					{
+						evtPropId = evtProperty.get("id");
+						if(evtPropId != null && !distinctProperties.contains(evtPropId.toString()))
+						{
+							distinctProperties.add(evtPropId.toString());
+						}
+						else
+						{
+							evtPropName = evtProperty.get("name");
+							if(evtPropName != null && !distinctProperties.contains(evtPropName.toString()))
+							{
+								distinctProperties.add(evtPropName.toString());
+							}
+						}
+					}
+					break;
+				}
+			}
+		}
+	}
+}
+distinctCount = distinctProperties.size();
+info "Distinct properties visited count for Lead " + LeadID + " = " + distinctCount;
+info "Latest completed visit datetime (raw) for Lead " + LeadID + " = " + latestVisit;
+leadUpdate = Map();
+leadUpdate.put("Lead_Id",LeadID);
+leadUpdate.put("propertiesVisited",distinctCount);
+leadUpdate.put("lastVisitedOn",latestVisit);
+leadUpdate.put("Created_Time",leadData.get("Created_Time"));
+leadUpdate.put("Modified_Time",leadData.get("Modified_Time"));
+info leadUpdate;
+info "Final webhook payload: " + leadUpdate;
+response = invokeurl
+[
+	url :API_ENDPOINT
+	type :POST
+	parameters:leadUpdate.toString()
+	headers:{"Content-Type":"application/json"}
+];
+info "API Response: " + response;
+if(response != null)
+{
+	info "Webhook sent successfully for Lead ID: " + LeadID;
+}
+else
+{
+	info "Failed to send webhook for Lead ID: " + LeadID;
+}
+}

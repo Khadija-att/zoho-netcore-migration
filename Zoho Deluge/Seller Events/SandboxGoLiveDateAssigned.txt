@@ -1,0 +1,26 @@
+void automation.SandboxGoLiveDateAssigned(Int propertyID)
+{
+info "Property ID: " + propertyID;
+propertyData = zoho.crm.getRecordById("Products",propertyID);
+if(propertyData == null)
+{
+	info "No Property found for ID: " + propertyID;
+	return;
+}
+propertyIdStr = propertyID.toString();
+webhookPayload = Map();
+webhookPayload.put("Property_Id",propertyIdStr);
+webhookPayload.put("Go_Live_Date",propertyData.get("Go_Live_Date"));
+webhookPayload.put("activity_name","go_live_date_changed");
+webhookPayload.put("User_Type","Property");
+info webhookPayload;
+apiendpoint = "https://qqvnbapdea.execute-api.ap-south-1.amazonaws.com/prod/sandbox-netcore-event";
+resp = invokeurl
+[
+	url :apiendpoint
+	type :POST
+	parameters:webhookPayload.toString()
+	headers:{"Content-Type":"application/json"}
+];
+info "API Gateway response: " + resp;
+}

@@ -1,0 +1,37 @@
+void automation.SandboxPropertyAcqStatusChanged(Int propertyID,String propertyHistory)
+{
+info "Property ID: " + propertyID;
+info "propertyHistory: " + propertyHistory;
+previousStatus = ifnull(propertyHistory.get("Acq_Status"),"");
+info previousStatus;
+if(previousStatus == null || previousStatus == "")
+{
+	return;
+}
+propertyData = zoho.crm.getRecordById("Products",propertyID);
+if(propertyData == null)
+{
+	info "No Property found for ID: " + propertyID;
+	return;
+}
+currentStatus = ifnull(propertyData.get("Acq_Status"),"");
+info "Previous Status: " + previousStatus;
+info "Current Status: " + currentStatus;
+propertyIdStr = propertyID.toString();
+webhookPayload = Map();
+webhookPayload.put("Property_Id",propertyIdStr);
+webhookPayload.put("previous_status",previousStatus);
+webhookPayload.put("new_status",currentStatus);
+webhookPayload.put("activity_name","acq_Status_changed");
+webhookPayload.put("User_Type","Property");
+info webhookPayload;
+apiendpoint = "https://qqvnbapdea.execute-api.ap-south-1.amazonaws.com/prod/sandbox-netcore-event";
+resp = invokeurl
+[
+	url :apiendpoint
+	type :POST
+	parameters:webhookPayload.toString()
+	headers:{"Content-Type":"application/json"}
+];
+info "API Gateway response: " + resp;
+}

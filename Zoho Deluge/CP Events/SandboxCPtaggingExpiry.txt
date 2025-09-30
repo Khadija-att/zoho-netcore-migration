@@ -1,0 +1,61 @@
+void automation.SandboxCPtaggingExpiry(Int bidID)
+{
+info "Bid ID: " + bidID;
+bidData = zoho.crm.getRecordById("Deals",bidID);
+if(bidData == null)
+{
+	info "No bid found for ID: " + bidData;
+	return;
+}
+webhookPayload = Map();
+Channel_Partner = bidData.get("Account_Name");
+if(Channel_Partner != null)
+{
+	if(Channel_Partner.containKey("id"))
+	{
+		cpId = Channel_Partner.get("id");
+		cpIdStr = cpId.toString();
+		webhookPayload.put("Channel_Partner_Id",cpIdStr);
+	}
+}
+Buyer_Lookup = bidData.get("Lead");
+if(Buyer_Lookup != null)
+{
+	if(Buyer_Lookup.containKey("id"))
+	{
+		leadId = Buyer_Lookup.get("id");
+		leadData = zoho.crm.getRecordById("Leads",leadId);
+		if(leadData != null)
+		{
+			webhookPayload.put("buyer_name",ifnull(leadData.get("Full_Name"),""));
+		}
+	}
+}
+Property_Lookup = bidData.get("Products");
+if(Property_Lookup != null)
+{
+	if(Property_Lookup.containKey("id"))
+	{
+		propID = Property_Lookup.get("id");
+		propData = zoho.crm.getRecordById("Products",propID);
+		if(propData != null)
+		{
+			webhookPayload.put("property_name",ifnull(propData.get("Product_Name"),""));
+		}
+	}
+}
+webhookPayload.put("deal_type",ifnull(bidData.get("Deal_Type"),""));
+webhookPayload.put("tag_expiry_date",ifnull(bidData.get("Tag_Expiry_Date"),""));
+webhookPayload.put("activity_name","bid_expiry_notification");
+webhookPayload.put("User_Type","Channel Partner");
+info webhookPayload;
+apiendpoint = "https://qqvnbapdea.execute-api.ap-south-1.amazonaws.com/prod/sandbox-netcore-event";
+resp = invokeurl
+[
+	url :apiendpoint
+	type :POST
+	parameters:webhookPayload.toString()
+	headers:{"Content-Type":"application/json"}
+];
+info "API Gateway response: " + resp;
+}

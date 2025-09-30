@@ -1,0 +1,115 @@
+void automation.SandboxSellerSyncFunction(Int sellerID)
+{
+info "Processing Seller ID: " + sellerID;
+sellerData = zoho.crm.getRecordById("Sellers",sellerID);
+propertyData = zoho.crm.getRelatedRecords('Property','Sellers',sellerID);
+info propertyData;
+if(propertyData != null)
+{
+	for each  p in propertyData
+	{
+		propId = p.get("id");
+		propIdStr = propId.toString();
+		propMap = Map();
+		propMap.put("Property_Id",propIdStr);
+		propMap.put("Phone_Number",sellerData.get("Phone_Number"));
+		propMap.put("First_Name",sellerData.get("First_Name"));
+		propMap.put("Last_Name",sellerData.get("Last_Name"));
+		propMap.put("Email",sellerData.get("Email"));
+		propMap.put("Name",sellerData.get("Name"));
+		propMap.put("User_Type","Property");
+		propMap.put("User_Source",sellerData.get("Seller_Source"));
+		propMap.put("User_CTA",sellerData.get("Channel"));
+		propMap.put("Call_Status",sellerData.get("Call_Status"));
+		propMap.put("Created_Time",sellerData.get("Created_Time"));
+		propMap.put("Modified_Time",sellerData.get("Modified_Time"));
+		owner = sellerData.get("Owner");
+		propMap.put("Truva_RM",owner.get("name"));
+		propMap.put("Property_Created",sellerData.get("Property_Created"));
+		propMap.put("Truva_Micromarket",sellerData.get("Truva_Micromarket"));
+		propMap.put("Reason_for_not_Truva_Qualified",sellerData.get("Truva_Qualified"));
+		propMap.put("Spouse_Name",sellerData.get("Spouse_Name"));
+		propMap.put("Spouse_Phone_Number",sellerData.get("Spouse_Phone_Number"));
+		propMap.put("Secondary_Email",sellerData.get("Secondary_Email"));
+		propMap.put("Call_Attempts",sellerData.get("Call_Attempts"));
+		propMap.put("Reason_for_lead_drop",sellerData.get("Reason_for_Lead_Drop"));
+		propMap.put("Follow_Up_on",sellerData.get("Follow_up_on"));
+		propMap.put("DND",sellerData.get("DND"));
+		propMap.put("Last_Called_on",sellerData.get("Call_Updates"));
+		propMap.put("Periscope_Sent",sellerData.get("Periscope_Sent1"));
+		propMap.put("Periscope_Status",sellerData.get("Periscope_Status"));
+		propMap.put("Campaign_Name",sellerData.get("Campaign_Name"));
+		propMap.put("Campaign_Source",sellerData.get("Campaign_Source"));
+		propMap.put("Adset_Name",sellerData.get("Adset_Name"));
+		propMap.put("Ad_Name",sellerData.get("Ad_Name"));
+		propMap.put("Is_Active","true");
+		info "Final payload:" + propMap;
+		api = "https://qqvnbapdea.execute-api.ap-south-1.amazonaws.com/prod/sandbox-netcore-sync";
+		resp = invokeurl
+		[
+			url :api
+			type :POST
+			parameters:propMap.toString()
+			headers:{"Content-Type":"application/json"}
+		];
+		info "Webhook sent. Response: " + resp.toString();
+	}
+}
+if(sellerData == null)
+{
+	info "Failed to fetch Seller data - sellerData is null";
+	return;
+}
+info "Seller data fetched successfully";
+webhookPayload = Map();
+webhookPayload.put("Seller_Id",sellerID.toString());
+webhookPayload.put("Phone_Number",sellerData.get("Phone_Number"));
+webhookPayload.put("First_Name",sellerData.get("First_Name"));
+webhookPayload.put("Last_Name",sellerData.get("Last_Name"));
+webhookPayload.put("Email",sellerData.get("Email"));
+webhookPayload.put("Name",sellerData.get("Name"));
+webhookPayload.put("User_Type","Seller");
+webhookPayload.put("User_Source",sellerData.get("Seller_Source"));
+webhookPayload.put("User_CTA",sellerData.get("Channel"));
+webhookPayload.put("Call_Status",sellerData.get("Call_Status"));
+webhookPayload.put("Created_Time",sellerData.get("Created_Time"));
+webhookPayload.put("Modified_Time",sellerData.get("Modified_Time"));
+owner = sellerData.get("Owner");
+webhookPayload.put("Truva_RM",owner.get("name"));
+webhookPayload.put("Property_Created",sellerData.get("Property_Created"));
+webhookPayload.put("Truva_Micromarket",sellerData.get("Truva_Micromarket"));
+webhookPayload.put("Reason_for_not_Truva_Qualified",sellerData.get("Truva_Qualified"));
+webhookPayload.put("Spouse_Name",sellerData.get("Spouse_Name"));
+webhookPayload.put("Spouse_Phone_Number",sellerData.get("Spouse_Phone_Number"));
+webhookPayload.put("Secondary_Email",sellerData.get("Secondary_Email"));
+webhookPayload.put("Call_Attempts",sellerData.get("Call_Attempts"));
+webhookPayload.put("Reason_for_lead_drop",sellerData.get("Reason_for_Lead_Drop"));
+webhookPayload.put("Follow_Up_on",sellerData.get("Follow_up_on"));
+webhookPayload.put("DND",sellerData.get("DND"));
+webhookPayload.put("Last_Called_on",sellerData.get("Call_Updates"));
+webhookPayload.put("Periscope_Sent",sellerData.get("Periscope_Sent1"));
+webhookPayload.put("Periscope_Status",sellerData.get("Periscope_Status"));
+webhookPayload.put("Campaign_Name",sellerData.get("Campaign_Name"));
+webhookPayload.put("Campaign_Source",sellerData.get("Campaign_Source"));
+webhookPayload.put("Adset_Name",sellerData.get("Adset_Name"));
+webhookPayload.put("Ad_Name",sellerData.get("Ad_Name"));
+webhookPayload.put("Is_Active","true");
+info "Final payload:" + webhookPayload;
+apiEndpoint = "https://qqvnbapdea.execute-api.ap-south-1.amazonaws.com/prod/sandbox-netcore-sync";
+response = invokeurl
+[
+	url :apiEndpoint
+	type :POST
+	parameters:webhookPayload.toString()
+	headers:{"Content-Type":"application/json"}
+];
+info response;
+if(response != null)
+{
+	info "Webhook sent successfully for Lead ID: " + sellerID;
+}
+else
+{
+	info "Failed to send webhook for Lead ID: " + sellerID;
+}
+}

@@ -1,0 +1,42 @@
+void automation.SandboxBidCPDealTypeChanged(Int bidID,String bidHistory)
+{
+bidData = zoho.crm.getRecordById("Deals",bidID);
+webhookPayload = Map();
+Channel_Partner = bidData.get("Account_Name");
+if(Channel_Partner != null)
+{
+	if(Channel_Partner.containKey("id"))
+	{
+		cpId = Channel_Partner.get("id");
+		cpIdStr = cpId.toString();
+		webhookPayload.put("Channel_Partner_Id",cpIdStr);
+	}
+}
+Buyer_Lookup = bidData.get("Lead");
+if(Buyer_Lookup != null)
+{
+	if(Buyer_Lookup.containKey("id"))
+	{
+		leadId = Buyer_Lookup.get("id");
+		leadData = zoho.crm.getRecordById("Leads",leadId);
+		if(leadData != null)
+		{
+			webhookPayload.put("buyer_name",ifnull(leadData.get("Full_Name"),""));
+			webhookPayload.put("buyer_phone",ifnull(leadData.get("Phone"),""));
+		}
+	}
+}
+webhookPayload.put("new_deal_type",ifnull(bidData.get("Deal_Type"),""));
+webhookPayload.put("previous_deal_type",ifnull(bidHistory.get("Deal_Type"),""));
+webhookPayload.put("User_Type","Channel Partner");
+webhookPayload.put("activity_name","cp_bid_deal_type_changed");
+apiendpoint = "https://qqvnbapdea.execute-api.ap-south-1.amazonaws.com/prod/sandbox-netcore-event";
+resp = invokeurl
+[
+	url :apiendpoint
+	type :POST
+	parameters:webhookPayload.toString()
+	headers:{"Content-Type":"application/json"}
+];
+info "Netcore event sent. Response: " + resp.toString();
+}

@@ -1,0 +1,35 @@
+void automation.SandboxAcqSocietyPartnerAssigned(Int propertyID)
+{
+propertyData = zoho.crm.getRecordById('Products',propertyID);
+Society_Partner = propertyData.get('Society_Partner');
+SocietyPartnerData = Map();
+propIdStr = propertyID.toString();
+SocietyPartnerData.put("Property_Id",propIdStr);
+SocietyPartnerData.put("User_Type","Property");
+if(Society_Partner != null)
+{
+	if(Society_Partner.containKey("id"))
+	{
+		spId = Society_Partner.get("id");
+		info "Society Partner ID: " + spId;
+		spDetails = zoho.crm.getRecordById("Society_Partners",spId);
+		info "SP Details: " + spDetails;
+		if(spDetails != null)
+		{
+			SocietyPartnerData.put("society_partner_name",spDetails.get("Name"));
+			SocietyPartnerData.put("society_partner_number",spDetails.get("Phone"));
+			SocietyPartnerData.put("activity_name",'acq_society_partner_assigned');
+			apiendpoint = "https://qqvnbapdea.execute-api.ap-south-1.amazonaws.com/prod/sandbox-netcore-event";
+			resp = invokeurl
+			[
+				url :apiendpoint
+				type :POST
+				parameters:SocietyPartnerData.toString()
+				headers:{"Content-Type":"application/json"}
+			];
+			info "API Gateway response: " + resp;
+		}
+	}
+	info SocietyPartnerData;
+}
+}

@@ -1,0 +1,29 @@
+void automation.SandboxCPassignedtoBuyer(Int leadID)
+{
+lead = zoho.crm.getRecordById("Leads",leadID);
+webhookPayload = Map();
+Channel_Partner = lead.get("Channel_Partner");
+if(Channel_Partner != null)
+{
+	if(Channel_Partner.containKey("id"))
+	{
+		cpId = Channel_Partner.get("id");
+		cpIdStr = cpId.toString();
+		webhookPayload.put("Channel_Partner_Id",cpIdStr);
+	}
+}
+webhookPayload.put("buyer_name",ifnull(lead.get("Full_Name"),""));
+webhookPayload.put("buyer_phone",ifnull(lead.get("Phone"),""));
+webhookPayload.put("tag_expiry_date",ifnull(lead.get("Tag_Expiry_Date"),""));
+webhookPayload.put("User_Type","Channel Partner");
+webhookPayload.put("activity_name","buyer_lead_assigned_to_cp");
+apiendpoint = "https://qqvnbapdea.execute-api.ap-south-1.amazonaws.com/prod/sandbox-netcore-event";
+resp = invokeurl
+[
+	url :apiendpoint
+	type :POST
+	parameters:webhookPayload.toString()
+	headers:{"Content-Type":"application/json"}
+];
+info "Netcore event sent. Response: " + resp.toString();
+}

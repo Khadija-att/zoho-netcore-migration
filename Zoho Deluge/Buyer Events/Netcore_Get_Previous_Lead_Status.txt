@@ -1,0 +1,31 @@
+void automation.Netcore_Get_Previous_Lead_Status(Int leadId,String leadHistory)
+{
+API_ENDPOINT = "https://1unsvm1tw6.execute-api.ap-south-1.amazonaws.com/netcore/cp-update-event";
+info "Lead ID: " + leadId;
+info "leadHistory: " + leadHistory;
+leadData = zoho.crm.getRecordById("Leads",leadId);
+if(leadData == null)
+{
+	info "No lead found for ID: " + leadId;
+	return;
+}
+currentStatus = ifnull(leadData.get("Lead_Status"),"");
+previousStatus = ifnull(leadHistory.get("Lead_Status"),"");
+info "Previous Status: " + previousStatus;
+info "Current Status: " + currentStatus;
+leadIdStr = leadId.toString();
+webhookPayload = Map();
+webhookPayload.put("Lead_Id",leadIdStr);
+webhookPayload.put("previous_status",previousStatus);
+webhookPayload.put("new_status",currentStatus);
+webhookPayload.put("activity_name","lead_status_changed");
+info webhookPayload;
+resp = invokeurl
+[
+	url :API_ENDPOINT
+	type :POST
+	parameters:webhookPayload.toString()
+	headers:{"Content-Type":"application/json"}
+];
+info "API Gateway response: " + resp;
+}

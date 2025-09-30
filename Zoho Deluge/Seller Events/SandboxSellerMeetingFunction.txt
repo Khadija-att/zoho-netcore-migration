@@ -1,0 +1,45 @@
+void automation.SandboxSellerMeetingFunction(Int meetingID)
+{
+meetingData = zoho.crm.getRecordById("Events",meetingID);
+info meetingData;
+module = meetingData.get('Module');
+if(module == "Property")
+{
+	WhatID = meetingData.get('What_Id');
+	if(WhatID == null)
+	{
+		info "What_Id is null, skipping processing.";
+		return;
+	}
+	PropertyId = WhatID.get('id');
+	PropertyCompleteData = zoho.crm.getRecordById('Products',PropertyId);
+	meetingEventData = Map();
+	status = meetingData.get("Visit_Status");
+	info status;
+	if(status == 'Scheduled' || status == 'Visit Scheduled' || status == 'Visit Schedule')
+	{
+		meetingEventData.put("activity_name","seller_meeting_scheduled");
+	}
+	else
+	{
+		meetingEventData.put("activity_name","seller_meeting_" + status.toLowerCase());
+	}
+	meetingEventData.put("User_Type","Property");
+	meetingEventData.put("Property_Id",PropertyId);
+	meetingEventData.put("Meeting time start",ifnull(meetingData.get("Start_DateTime"),"NA"));
+	info meetingEventData;
+	apiendpoint = "https://qqvnbapdea.execute-api.ap-south-1.amazonaws.com/prod/sandbox-netcore-event";
+	resp = invokeurl
+	[
+		url :apiendpoint
+		type :POST
+		parameters:meetingEventData.toString()
+		headers:{"Content-Type":"application/json"}
+	];
+	info resp;
+}
+else
+{
+	info "Module is not Property, skipping execution.";
+}
+}

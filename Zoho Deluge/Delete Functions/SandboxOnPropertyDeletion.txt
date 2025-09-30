@@ -1,0 +1,44 @@
+void automation.SandboxOnPropertyDeletion(Int propertyID)
+{
+info "Processing Lead ID: " + propertyID;
+propertyData = zoho.crm.getRecordById("Products",propertyID);
+info propertyData;
+try 
+{
+	if(propertyData == null)
+	{
+		info "Failed to fetch Lead data - leadData is null";
+		return;
+	}
+	info "Lead data fetched successfully";
+	propIdStr = propertyID.toString();
+	webhookPayload = Map();
+	webhookPayload.put("Property_Id",propIdStr);
+	webhookPayload.put("Is_Active","false");
+	webhookPayload.put("User_Type","Property");
+	webhookPayload.put("Created_Time",propertyData.get("Created_Time"));
+	webhookPayload.put("Modified_Time",propertyData.get("Modified_Time"));
+	info webhookPayload;
+	apiendpoint = "https://qqvnbapdea.execute-api.ap-south-1.amazonaws.com/prod/sandbox-netcore-sync";
+	response = invokeurl
+	[
+		url :apiendpoint
+		type :POST
+		parameters:webhookPayload.toString()
+		headers:{"Content-Type":"application/json"}
+	];
+	info "API Response: " + response;
+	if(response != null)
+	{
+		info "Webhook sent successfully for Lead ID: " + propertyID;
+	}
+	else
+	{
+		info "Failed to send webhook for Lead ID: " + propertyID;
+	}
+}
+catch (error)
+{
+	info "error: " + error;
+}
+}
