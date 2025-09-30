@@ -1,6 +1,6 @@
 void automation.Netcore_Get_Previous_Lead_Status(Int leadId,String leadHistory)
 {
-API_ENDPOINT = "https://1unsvm1tw6.execute-api.ap-south-1.amazonaws.com/netcore/cp-update-event";
+API_ENDPOINT = "https://qqvnbapdea.execute-api.ap-south-1.amazonaws.com/prod/sandbox-netcore-event";
 info "Lead ID: " + leadId;
 info "leadHistory: " + leadHistory;
 leadData = zoho.crm.getRecordById("Leads",leadId);

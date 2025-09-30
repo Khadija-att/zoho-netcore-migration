@@ -1,6 +1,6 @@
 void automation.Netcore_Init_Visit_Event(Int meetingID)
 {
-API_ENDPOINT = "https://1unsvm1tw6.execute-api.ap-south-1.amazonaws.com/netcore/cp-update-event";
+API_ENDPOINT = "https://qqvnbapdea.execute-api.ap-south-1.amazonaws.com/prod/sandbox-netcore-event";
 meetingData = zoho.crm.getRecordById("Events",meetingID);
 info meetingData;
 ProcessingCount = ifnull(meetingData.get("Processing_Count"),0);
