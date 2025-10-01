@@ -213,6 +213,7 @@ leadUpdate.put("propertiesVisited",distinctCount);
 leadUpdate.put("lastVisitedOn",latestVisit);
 leadUpdate.put("Created_Time",leadData.get("Created_Time"));
 leadUpdate.put("Modified_Time",leadData.get("Modified_Time"));
+leadUpdate.put("User_Type","Buyer");
 info leadUpdate;
 info "Final webhook payload: " + leadUpdate;
 response = invokeurl

@@ -20,7 +20,49 @@ if(Channel_Partner != null)
 			ChannelPartnerData.put("cp_name",ifnull(cpDetails.get("Contact_name"),"NA"));
 			ChannelPartnerData.put("cp_number",ifnull(cpDetails.get("Phone"),"NA"));
 			if(companyData != null)
+			{void automation.netcore_get_channel_partner_assigned_data(Int leadId)
+{
+API_ENDPOINT = "https://qqvnbapdea.execute-api.ap-south-1.amazonaws.com/prod/sandbox-netcore-event";
+leadData = zoho.crm.getRecordById('Leads',leadId);
+Channel_Partner = leadData.get('Channel_Partner');
+ChannelPartnerData = Map();
+ChannelPartnerData.put("tag_expiry_date",ifnull(leadData.get("Tag_Expiry_Date"),"NA"));
+if(Channel_Partner != null)
+{
+	if(Channel_Partner.containKey("id"))
+	{
+		cpId = Channel_Partner.get("id");
+		cpDetails = zoho.crm.getRecordById("Accounts",cpId);
+		leadIdStr = leadId.toString();
+		info cpDetails;
+		if(cpDetails != null)
+		{
+			companyData = cpDetails.get("Company_lookup");
+			ChannelPartnerData.put("Lead_Id",leadIdStr);
+			ChannelPartnerData.put("User_Type","Buyer");
+			ChannelPartnerData.put("cp_name",ifnull(cpDetails.get("Contact_name"),"NA"));
+			ChannelPartnerData.put("cp_number",ifnull(cpDetails.get("Phone"),"NA"));
+			if(companyData != null)
 			{
+				ChannelPartnerData.put("cp_company",ifnull(companyData.get("name"),"NA"));
+			}
+			else
+			{
+				ChannelPartnerData.put("cp_company","NA");
+			}
+			ChannelPartnerData.put("activity_name","lead_assigned_to_cp");
+			resp = invokeurl
+			[
+				url :API_ENDPOINT
+				type :POST
+				parameters:ChannelPartnerData.toString()
+				headers:{"Content-Type":"application/json"}
+			];
+			info "API Gateway response: " + resp;
+		}
+	}
+}
+}
 				ChannelPartnerData.put("cp_company",ifnull(companyData.get("name"),"NA"));
 			}
 			else

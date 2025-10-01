@@ -34,6 +34,7 @@ if(module == "Bid")
 	TruvaRM = Owner.get('name');
 	meetingEventData.put("Lead_Id",ifnull(LeadID,"NA"));
 	meetingEventData.put("Meeting Record Id",ifnull(meetingID.toString(),"NA"));
+	meetingEventData.put("User_Type","Buyer");
 	meetingEventData.put("Meeting Title",ifnull(meetingData.get("Event_Title"),"NA"));
 	meetingEventData.put("Meeting Created Time",ifnull(meetingData.get("Created_Time"),"NA"));
 	meetingEventData.put("Meeting time start",ifnull(meetingData.get("Start_DateTime"),"NA"));

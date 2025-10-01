@@ -19,6 +19,7 @@ webhookPayload.put("Lead_Id",leadIdStr);
 webhookPayload.put("previous_status",previousStatus);
 webhookPayload.put("new_status",currentStatus);
 webhookPayload.put("activity_name","lead_status_changed");
+webhookPayload.put("User_Type","Buyer");
 info webhookPayload;
 resp = invokeurl
 [
