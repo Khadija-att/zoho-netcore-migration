@@ -1,0 +1,41 @@
+void automation.SandboxAcqChannelPartnerAssigned(Int propertyID)
+{
+propertyData = zoho.crm.getRecordById('Products',propertyID);
+Channel_Partner = propertyData.get('Account_Name');
+ChannelPartnerData = Map();
+propIdStr = propertyID.toString();
+// ChannelPartnerData.put("Property_Id",propIdStr);
+ChannelPartnerData.put("tag_expiry_date",propertyData.get("Tag_Expiry_Date"));
+ChannelPartnerData.put("Deal_Type",propertyData.get("Deal_Type"));
+ChannelPartnerData.put("CP_Tagging_Status",propertyData.get("CP_Tagging_Status"));
+ChannelPartnerData.put("User_Type","Property");
+if(Channel_Partner != null)
+{
+	if(Channel_Partner.containKey("id"))
+	{
+		cpId = Channel_Partner.get("id");
+		info "Channel Partner ID: " + cpId;
+		cpDetails = zoho.crm.getRecordById("Accounts",cpId);
+		info "CP Details: " + cpDetails;
+		if(cpDetails != null)
+		{
+			companyData = cpDetails.get("Company_lookup");
+			info "Channel Partner data fetched successfully";
+			ChannelPartnerData.put("cp_name",cpDetails.get("Contact_name"));
+			ChannelPartnerData.put("cp_number",cpDetails.get("Phone"));
+			ChannelPartnerData.put("cp_company",companyData.get("name"));
+			ChannelPartnerData.put("activity_name",'acq_Channel_Partner_assigned');
+			apiendpoint = "https://qqvnbapdea.execute-api.ap-south-1.amazonaws.com/prod/sandbox-netcore-event";
+			resp = invokeurl
+			[
+				url :apiendpoint
+				type :POST
+				parameters:ChannelPartnerData.toString()
+				headers:{"Content-Type":"application/json"}
+			];
+			info "API Gateway response: " + resp;
+		}
+	}
+	info ChannelPartnerData;
+}
+}
