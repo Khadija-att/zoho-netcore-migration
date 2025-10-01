@@ -23,7 +23,14 @@ if(Channel_Partner != null)
 			info "Channel Partner data fetched successfully";
 			ChannelPartnerData.put("cp_name",cpDetails.get("Contact_name"));
 			ChannelPartnerData.put("cp_number",cpDetails.get("Phone"));
-			ChannelPartnerData.put("cp_company",companyData.get("name"));
+			if(companyData != null)
+			{
+				ChannelPartnerData.put("cp_company",companyData.get("name"));
+			}
+			else
+			{
+				info "CompanyData is empty";
+			}
 			ChannelPartnerData.put("activity_name",'acq_Channel_Partner_assigned');
 			apiendpoint = "https://qqvnbapdea.execute-api.ap-south-1.amazonaws.com/prod/sandbox-netcore-event";
 			resp = invokeurl
