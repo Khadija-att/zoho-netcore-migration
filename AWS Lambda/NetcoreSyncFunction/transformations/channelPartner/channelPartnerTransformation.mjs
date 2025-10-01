@@ -17,6 +17,7 @@ const channelPartnerSchema = z.object({
     z.string().optional().nullable()
   ),
   Modified_Time: z.string().optional().nullable(),
+  User_Type: z.string().optional().nullable(),
 }).transform(src => {
   const result = { USER_ID: src.Channel_Partner_Id };
   setIfDefined(result, "EMAIL", src.Email);
@@ -31,6 +32,7 @@ const channelPartnerSchema = z.object({
   setIfDefined(result, "3P_LISTING_PLATFORM", src.Listing_Platform);
   setIfDefined(result, "TRUVA_MICROMARKET", src.Active_Micromarket);
   setIfDefined(result, "ACTIVITY", src.lead_activity ?? "add");
+  setIfDefined(result, "USER_TYPE", src.User_Type);
   result._original_payload = src;
   return result;
 });

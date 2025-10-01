@@ -63,7 +63,9 @@ const leadSchema = z.object({
   Referred_by: z.string().optional().nullable(),
   Spouse_Name: z.string().optional().nullable(),
   lead_activity: z.string().optional().nullable(),
-  Company_lookup: z.object({ name: z.string(), id: z.string() }).optional().nullable()
+  Page_Name: z.any().optional().nullable(),
+  Page_ID: z.any().optional().nullable(),
+  //Company_lookup: z.object({ name: z.string(), id: z.string() }).optional().nullable()
 }).transform(src => {
   const result = { USER_ID: src.Lead_Id };
   setIfDefined(result, "EMAIL", src.Email);
@@ -72,7 +74,7 @@ const leadSchema = z.object({
   setIfDefined(result, "SPOUSE_PHONE", src.Spouse_Phone ? cleanPhone(src.Spouse_Phone) : src.Spouse_Phone);
   setIfDefined(
     result,
-    "NAME",
+    "FULL_NAME",
     (src?.Lead_Name ?? `${src?.First_Name ?? ""} ${src?.Last_Name ?? ""}`.trim()) || ""
   );
   
@@ -111,6 +113,8 @@ const leadSchema = z.object({
   setIfDefined(result, "REFERRED_BY", src.Referred_by);
   setIfDefined(result, "SPOUSE_NAME", src.Spouse_Name);
   setIfDefined(result, "ACTIVITY", src.lead_activity ?? "add");
+  setIfDefined(result, "PAGE_NAME", src.Page_Name);
+  setIfDefined(result, "PAGE_ID", src.Page_ID);
   result._original_payload = src;
   return result;
 });
