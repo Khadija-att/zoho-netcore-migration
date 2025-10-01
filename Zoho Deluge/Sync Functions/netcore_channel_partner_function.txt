@@ -10,23 +10,23 @@ if(channelpartnerData == null)
 }
 info "Channel Partner data fetched successfully";
 webhookPayload = Map();
-webhookPayload.put("Channel_Partner_Id",ifnull(channelpartnerId.toString(),"NA"));
-webhookPayload.put("Phone",ifnull(channelpartnerData.get("Phone"),"NA"));
-webhookPayload.put("Email",ifnull(channelpartnerData.get("Email"),"NA"));
-webhookPayload.put("Contact_Name",ifnull(channelpartnerData.get("Contact_name"),"NA"));
+webhookPayload.put("Channel_Partner_Id",ifnull(channelpartnerId.toString(),""));
+webhookPayload.put("Phone",ifnull(channelpartnerData.get("Phone"),""));
+webhookPayload.put("Email",ifnull(channelpartnerData.get("Email"),""));
+webhookPayload.put("Contact_Name",ifnull(channelpartnerData.get("Contact_name"),""));
 webhookPayload.put("User_Type","Channel Partner");
 ChannelpartnerOwner = ifnull(channelpartnerData.get("Owner"),null);
 if(ChannelpartnerOwner != null && ChannelpartnerOwner.containKey("name"))
 {
-	webhookPayload.put("Channel_Partner_Owner",ifnull(ChannelpartnerOwner.get("name"),"NA"));
+	webhookPayload.put("Channel_Partner_Owner",ifnull(ChannelpartnerOwner.get("name"),""));
 }
 else
 {
 	webhookPayload.put("Channel_Partner_Owner","NA");
 }
-webhookPayload.put("Type",ifnull(channelpartnerData.get("Type"),"NA"));
-webhookPayload.put("Created_Time",ifnull(channelpartnerData.get("Created_Time"),"NA"));
-webhookPayload.put("Modified_Time",ifnull(channelpartnerData.get("Modified_Time"),"NA"));
+webhookPayload.put("Type",ifnull(channelpartnerData.get("Type"),""));
+webhookPayload.put("Created_Time",ifnull(channelpartnerData.get("Created_Time"),""));
+webhookPayload.put("Modified_Time",ifnull(channelpartnerData.get("Modified_Time"),""));
 webhookPayload.put("Is_Active","true");
 // Handle Company Lookup
 companyLookup = ifnull(channelpartnerData.get("Company_lookup"),null);
@@ -42,24 +42,24 @@ if(companyLookup != null && companyLookup != "" && companyLookup.containKey("id"
 		if(companyDetails != null)
 		{
 			info "Company data fetched successfully";
-			webhookPayload.put("Company_Name",ifnull(companyDetails.get("Name"),"NA"));
-			webhookPayload.put("Active_Micromarket",ifnull(companyDetails.get("Active_Micromarket"),"NA"));
-			info "Companies Company Name: " + ifnull(companyDetails.get("Name"),"NA");
-			info "Companies Active_Micromarket: " + ifnull(companyDetails.get("Active_Micromarket"),"NA");
+			webhookPayload.put("Company_Name",ifnull(companyDetails.get("Name"),""));
+			webhookPayload.put("Active_Micromarket",ifnull(companyDetails.get("Active_Micromarket"),""));
+			info "Companies Company Name: " + ifnull(companyDetails.get("Name"),"");
+			info "Companies Active_Micromarket: " + ifnull(companyDetails.get("Active_Micromarket"),"");
 		}
 		else
 		{
 			info "Failed to fetch Companies data by cpId: " + companyId;
-			webhookPayload.put("Company_Name","NA");
-			webhookPayload.put("Active_Micromarket","NA");
+			webhookPayload.put("Company_Name","");
+			webhookPayload.put("Active_Micromarket","");
 		}
 	}
 }
 else
 {
 	info "Company lookup missing or invalid; leaving Company fields as NA";
-	webhookPayload.put("Company_Name","NA");
-	webhookPayload.put("Active_Micromarket","NA");
+	webhookPayload.put("Company_Name","");
+	webhookPayload.put("Active_Micromarket","");
 }
 info webhookPayload;
 apiEndpoint = "https://qqvnbapdea.execute-api.ap-south-1.amazonaws.com/prod/sandbox-netcore-sync";

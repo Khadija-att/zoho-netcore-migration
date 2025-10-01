@@ -1,8 +1,8 @@
 void automation.SandboxBuyerSyncFunction(Int leadId)
 {
-info "Processing Lead ID: " + leadId;
+// info "Processing Lead ID: " + leadId;
 leadData = zoho.crm.getRecordById("Leads",leadId);
-info leadData;
+// info leadData;
 try 
 {
 	if(leadData == null)
@@ -10,44 +10,52 @@ try
 		info "Failed to fetch Lead data - leadData is null";
 		return;
 	}
-	info "Lead data fetched successfully";
 	leadIdStr = leadId.toString();
 	webhookPayload = Map();
 	webhookPayload.put("Lead_Id",leadIdStr);
 	webhookPayload.put("Phone",leadData.get("Phone"));
 	webhookPayload.put("Email",leadData.get("Email"));
 	fullName = ifnull(leadData.get("First_Name"),"") + " " + ifnull(leadData.get("Last_Name"),"");
-	webhookPayload.put("Lead_Name",fullName.trim());
-	webhookPayload.put("Lead_Source",leadData.get("Lead_Source"));
-	webhookPayload.put("Lead_Status",leadData.get("Lead_Status"));
+	webhookPayload.put("Lead_Name",ifnull(fullName,"").trim());
+	webhookPayload.put("Lead_Source",ifnull(leadData.get("Lead_Source"),""));
+	webhookPayload.put("Lead_Status",ifnull(leadData.get("Lead_Status"),""));
+	webhookPayload.put("Page_Name",ifnull(leadData.get("Page_Name"),""));
+	webhookPayload.put("Page_ID",ifnull(leadData.get("Page_ID"),""));
 	webhookPayload.put("Is_Active","true");
 	webhookPayload.put("User_Type","Buyer");
-	webhookPayload.put("Previous_Lead_Status",leadData.get("Previous_Lead_Status"));
-	webhookPayload.put("Created_Time",leadData.get("Created_Time"));
-	webhookPayload.put("Modified_Time",leadData.get("Modified_Time"));
-	webhookPayload.put("Duplicate_Status",leadData.get("Duplicate_Status"));
-	webhookPayload.put("Duplicate_Lead",leadData.get("Duplicate_Lead"));
+	webhookPayload.put("Previous_Lead_Status",ifnull(leadData.get("Previous_Lead_Status"),""));
+	webhookPayload.put("Created_Time",ifnull(leadData.get("Created_Time"),""));
+	webhookPayload.put("Modified_Time",ifnull(leadData.get("Modified_Time"),""));
+	webhookPayload.put("Duplicate_Status",ifnull(leadData.get("Duplicate_Status"),""));
+	webhookPayload.put("Duplicate_Lead",ifnull(leadData.get("Duplicate_Lead"),""));
 	owner = leadData.get("Owner");
-	webhookPayload.put("Lead_Owner",owner.get("name"));
-	webhookPayload.put("Priority",leadData.get("Priority"));
-	webhookPayload.put("Listing_Platform",leadData.get("Listing_Platform"));
-	webhookPayload.put("Project_name",leadData.get("Project_name"));
-	webhookPayload.put("Campaign_Name",leadData.get("Form_Name"));
-	webhookPayload.put("Campaign",leadData.get("Campaign_Name"));
-	webhookPayload.put("Ad_set",leadData.get("Ad_set"));
-	webhookPayload.put("Form_ID",leadData.get("Form_ID"));
-	webhookPayload.put("Social_Lead_ID",leadData.get("leadchain0__Social_Lead_ID"));
-	webhookPayload.put("Ad_Name",leadData.get("Ad_Name"));
-	webhookPayload.put("No_Of_attempts",leadData.get("No_Of_attempts"));
-	webhookPayload.put("Interested_in_visit",leadData.get("Interested_in_visit"));
-	webhookPayload.put("Preferences",leadData.get("Preferences"));
-	webhookPayload.put("Use_Case",leadData.get("Use_Case"));
-	webhookPayload.put("Preferred_Area",leadData.get("Preferred_Area"));
-	webhookPayload.put("Current_Stay",leadData.get("Current_Stay"));
-	webhookPayload.put("Budget",leadData.get("Budget"));
-	webhookPayload.put("Preferred_time_of_Visit",leadData.get("Preferred_time_of_Visit"));
-	webhookPayload.put("Not_Qualified_Reason",leadData.get("Not_Qualified_Reason"));
-	webhookPayload.put("Tag_Expiry_Date",leadData.get("Tag_Expiry_Date"));
+	if(owner != null)
+	{
+		webhookPayload.put("Lead_Owner",ifnull(owner.get("name"),""));
+	}
+	else
+	{
+		webhookPayload.put("Lead_Owner","");
+	}
+	webhookPayload.put("Priority",ifnull(leadData.get("Priority"),""));
+	webhookPayload.put("Listing_Platform",ifnull(leadData.get("Listing_Platform"),""));
+	webhookPayload.put("Project_name",ifnull(leadData.get("Project_name"),""));
+	webhookPayload.put("Campaign_Name",ifnull(leadData.get("Form_Name"),""));
+	webhookPayload.put("Campaign",ifnull(leadData.get("Campaign_Name"),""));
+	webhookPayload.put("Ad_set",ifnull(leadData.get("Ad_set"),"NA"));
+	webhookPayload.put("Form_ID",ifnull(leadData.get("Form_ID"),"NA"));
+	webhookPayload.put("Social_Lead_ID",ifnull(leadData.get("leadchain0__Social_Lead_ID"),""));
+	webhookPayload.put("Ad_Name",ifnull(leadData.get("Ad_Name"),""));
+	webhookPayload.put("No_Of_attempts",ifnull(leadData.get("No_Of_attempts"),"0"));
+	webhookPayload.put("Interested_in_visit",ifnull(leadData.get("Interested_in_visit"),""));
+	webhookPayload.put("Preferences",ifnull(leadData.get("Preferences"),""));
+	webhookPayload.put("Use_Case",ifnull(leadData.get("Use_Case"),""));
+	webhookPayload.put("Preferred_Area",ifnull(leadData.get("Preferred_Area"),""));
+	webhookPayload.put("Current_Stay",ifnull(leadData.get("Current_Stay"),""));
+	webhookPayload.put("Budget",ifnull(leadData.get("Budget"),""));
+	webhookPayload.put("Preferred_time_of_Visit",ifnull(leadData.get("Preferred_time_of_Visit"),""));
+	webhookPayload.put("Not_Qualified_Reason",ifnull(leadData.get("Not_Qualified_Reason"),""));
+	webhookPayload.put("Tag_Expiry_Date",ifnull(leadData.get("Tag_Expiry_Date"),""));
 	webhookPayload.put("User_Type","Buyer");
 	micromarket = ifnull(leadData.get("Truva_Micromarket"),list());
 	cleanMicromarket = list();
