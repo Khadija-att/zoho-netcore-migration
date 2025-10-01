@@ -60,7 +60,7 @@ export const handler = async (event) => {
             return { messageId, statusCode: 400, reason: "Unknown User_Type" };
         }
 
-        await saveToRawS3(messageId, receivedZohoData, userType);
+        await saveToRawS3(messageId, receivedZohoData, userType); 
 
         const transformationForNetCore = await transformationFn(receivedZohoData);
         console.log("transformationForNetCore->>>>>>>", transformationForNetCore);
