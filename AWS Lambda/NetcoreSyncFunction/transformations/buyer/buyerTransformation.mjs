@@ -65,7 +65,7 @@ const leadSchema = z.object({
   lead_activity: z.string().optional().nullable(),
   Page_Name: z.any().optional().nullable(),
   Page_ID: z.any().optional().nullable(),
-  //Company_lookup: z.object({ name: z.string(), id: z.string() }).optional().nullable()
+  Birth_Date: z.any().optional().nullable(),
 }).transform(src => {
   const result = { USER_ID: src.Lead_Id };
   setIfDefined(result, "EMAIL", src.Email);
@@ -92,6 +92,7 @@ const leadSchema = z.object({
   setIfDefined(result, "USER_CREATED_TIME", src.Created_Time ? new Date(src.Created_Time).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }) : undefined);
   setIfDefined(result, "USER_MODIFIED_TIME", src.Modified_Time ? new Date(src.Modified_Time).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }) : undefined);
   setIfDefined(result, "CP_TAG_EXPIRY_DATE", toYYYYMMDD(src.Tag_Expiry_Date));
+  setIfDefined(result, "BIRTH_DATE", toYYYYMMDD(src.Birth_Date));
   setIfDefined(result, "3P_SOCIETY_NAME", src.Project_name || src.Form_Name);
   setIfDefined(result, "CAMPAIGN_ID", src.Campaign);
   setIfDefined(result, "AD_SET_ID", src.Ad_set);

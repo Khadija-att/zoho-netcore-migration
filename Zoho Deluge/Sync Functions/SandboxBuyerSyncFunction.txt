@@ -21,6 +21,7 @@ try
 	webhookPayload.put("Lead_Status",ifnull(leadData.get("Lead_Status"),""));
 	webhookPayload.put("Page_Name",ifnull(leadData.get("Page_Name"),""));
 	webhookPayload.put("Page_ID",ifnull(leadData.get("Page_ID"),""));
+	webhookPayload.put("Birth_Date",ifnull(leadData.get("Birth_Date"),""));
 	webhookPayload.put("Is_Active","true");
 	webhookPayload.put("User_Type","Buyer");
 	webhookPayload.put("Previous_Lead_Status",ifnull(leadData.get("Previous_Lead_Status"),""));
