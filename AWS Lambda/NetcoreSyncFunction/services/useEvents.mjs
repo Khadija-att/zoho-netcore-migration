@@ -25,8 +25,14 @@ function isUpdateEvent(createdTimeStr, modifiedTimeStr) {
 }
 
 
-async function sendNetcoreEvent(data, USER_CREATED_TIME, USER_MODIFIED_TIME, USER_TYPE) {
+async function sendNetcoreEvent(data, USER_CREATED_TIME, USER_MODIFIED_TIME, USER_TYPE, isActive) {
     let eventType, apiKey, assetId;
+    if (isActive == "false") {
+        const statusResponse = {
+            statusCode: 400
+        };
+        return statusResponse;
+    }
     if (USER_TYPE === "Seller") {
         eventType = isUpdateEvent(USER_CREATED_TIME, USER_MODIFIED_TIME)
             ? "Seller_lead_updated"

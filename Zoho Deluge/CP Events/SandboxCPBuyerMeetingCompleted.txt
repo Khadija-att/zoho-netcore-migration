@@ -48,7 +48,15 @@ if(module == "Bid")
 	meetingEventData.put("previous_visit_status",ifnull(meetingHistory.get("Visit_Status"),"NA"));
 	meetingEventData.put("bid_stage",ifnull(bidData.get("Stage"),"NA"));
 	meetingEventData.put("bid_source",ifnull(bidData.get("Lead_Source"),"NA"));
-	meetingEventData.put("Dislikes",ifnull(bidData.get("Dislikes"),"NA"));
+	dislikesList = bidData.get("Dislikes");
+	if(dislikesList.isEmpty())
+	{
+		meetingEventData.put("Dislikes","");
+	}
+	else
+	{
+		meetingEventData.put("Dislikes",dislikesList);
+	}
 	meetingEventData.put("bid_truva_micromarket",ifnull(bidData.get("Truva_Micromarket"),"NA"));
 	meetingEventData.put("no_of_bid_visits",ifnull(bidData.get("No_of_Visits"),"NA"));
 	meetingEventData.put("Property_name",ifnull(propertyData.get("Product_Name"),"NA"));

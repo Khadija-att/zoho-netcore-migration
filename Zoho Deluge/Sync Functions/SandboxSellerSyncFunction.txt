@@ -12,6 +12,118 @@ if(propertyData != null)
 		propIdStr = propId.toString();
 		propMap = Map();
 		propMap.put("Property_Id",propIdStr);
+		propertyData = zoho.crm.getRecordById("Products",propId);
+		propMap.put("Property_Name",propertyData.get("Product_Name"));
+		propMap.put("Property_Source",propertyData.get("Source"));
+		propMap.put("Property_Status",propertyData.get("Status"));
+		propMap.put("Referror",null);
+		ReferrorLookup = propertyData.get("Referror_Name");
+		if(ReferrorLookup != null && ReferrorLookup != "")
+		{
+			Refid = ReferrorLookup.get("id");
+			Referror = zoho.crm.getRecordById("Referral",Refid);
+			propMap.put("Referror",Referror.get("Name"));
+		}
+		propMap.put("User_Type","Property");
+		propMap.put("Unit_Number",propertyData.get("Unit"));
+		propMap.put("Truva_RM",null);
+		owner = propertyData.get("Owner");
+		if(owner != null && owner != "")
+		{
+			propMap.put("Truva_RM",owner.get("name"));
+		}
+		propMap.put("Priority",propertyData.get("Priority"));
+		propMap.put("Created_Time",propertyData.get("Created_Time"));
+		propMap.put("Modified_Time",propertyData.get("Modified_Time"));
+		propMap.put("Product_Category",propertyData.get("Product_Category"));
+		propMap.put("Truva_Micromarket",propertyData.get("Truva_Micromarket"));
+		propMap.put("Property_Seller_Source",propertyData.get("Seller_Source"));
+		propMap.put("Visit_Date",propertyData.get("Visit_Date"));
+		propMap.put("Visit_by",null);
+		visitBy = propertyData.get("Visit_by");
+		if(visitBy != null)
+		{
+			propMap.put("Visit_by",visitBy.get("name"));
+		}
+		propMap.put("Go_Live_Date",propertyData.get("Go_Live_Date"));
+		propMap.put("Explore_Later_On",propertyData.get("Explore_Later_On"));
+		propMap.put("Seller_Profile",propertyData.get("Seller_Profile"));
+		propMap.put("Likelihood",propertyData.get("Likelihood"));
+		propMap.put("Acq_Status",propertyData.get("Acq_Status"));
+		propMap.put("Proposal_Link",propertyData.get("Proposal_Link"));
+		propMap.put("Offer_Date",propertyData.get("Offer_Date"));
+		propMap.put("Deal_Closed_Date",propertyData.get("Kill_Date"));
+		propMap.put("Customer_Rejection_Reason",propertyData.get("Rejection_Bucket"));
+		propMap.put("Seller_Interaction_Date",propertyData.get("Seller_Interaction"));
+		propMap.put("Truva_Rejection_reason",propertyData.get("Truva_Rejection_reason"));
+		propMap.put("Offer_Revision",propertyData.get("Offer_Revision"));
+		propMap.put("Date_of_Recycle",propertyData.get("Date_of_Recycle"));
+		propMap.put("Possession_Date",propertyData.get("Possession_Date"));
+		propMap.put("Deal_Type",propertyData.get("Deal_Type"));
+		propMap.put("Tag_Expiry_Date",propertyData.get("Tag_Expiry_Date"));
+		propMap.put("CP_Tagging_Status",propertyData.get("CP_Tagging_Status"));
+		propMap.put("Seller_MoU_Signing_Date",propertyData.get("Seller_MoU_Signing_Date"));
+		propMap.put("Buyer_MoU_Signing_Date",propertyData.get("Buyer_MoU_Signing_Date"));
+		propMap.put("Tri_Party_MOU",propertyData.get("Tri_Party_MOU"));
+		propMap.put("Exclusivity_Agreement",propertyData.get("Exclusivity_Agreement"));
+		propMap.put("Is_Active","true");
+		propMap.put("Tower",null);
+		propMap.put("Society",null);
+		propMap.put("Township",null);
+		towerLookup = propertyData.get("Tower");
+		info towerLookup;
+		info "Tower lookup raw value: " + towerLookup;
+		if(towerLookup != null && towerLookup != "")
+		{
+			if(towerLookup.containKey("id"))
+			{
+				towerId = towerLookup.get("id");
+				towerDetails = zoho.crm.getRecordById("Towers",towerId);
+				info "Tower Details: " + towerDetails;
+				if(towerDetails != null)
+				{
+					propMap.put("Tower",towerDetails.get("Name"));
+					propMap.put("Society",towerDetails.get("Society"));
+					propMap.put("Township",towerDetails.get("Township"));
+				}
+			}
+		}
+		propMap.put("Acq_Channel_Partner_Name",null);
+		propMap.put("Acq_Channel_Partner_Number",null);
+		channelPartnerLookup = propertyData.get("Account_Name");
+		info "Channel Partner lookup raw value: " + channelPartnerLookup;
+		if(channelPartnerLookup != null && channelPartnerLookup != "")
+		{
+			if(channelPartnerLookup.containKey("id"))
+			{
+				cpId = channelPartnerLookup.get("id");
+				cpDetails = zoho.crm.getRecordById("Accounts",cpId);
+				info "CP Details: " + cpDetails;
+				if(cpDetails != null)
+				{
+					propMap.put("Acq_Channel_Partner_Name",cpDetails.get("Contact_name"));
+					propMap.put("Acq_Channel_Partner_Number",cpDetails.get("Phone"));
+				}
+			}
+		}
+		propMap.put("Acq_Society_Partner_Name",null);
+		propMap.put("Acq_Society_Partner_Number",null);
+		societyPartnerLookup = propertyData.get("Society_Partner");
+		info "Society Partner lookup raw value: " + societyPartnerLookup;
+		if(societyPartnerLookup != null && societyPartnerLookup != "")
+		{
+			if(societyPartnerLookup.containKey("id"))
+			{
+				spId = societyPartnerLookup.get("id");
+				spDetails = zoho.crm.getRecordById("Society_Partners",spId);
+				info "SP Details: " + spDetails;
+				if(spDetails != null)
+				{
+					propMap.put("Acq_Society_Partner_Name",spDetails.get("Name"));
+					propMap.put("Acq_Society_Partner_Number",spDetails.get("Phone"));
+				}
+			}
+		}
 		propMap.put("Phone_Number",sellerData.get("Phone_Number"));
 		propMap.put("First_Name",sellerData.get("First_Name"));
 		propMap.put("Last_Name",sellerData.get("Last_Name"));
@@ -21,12 +133,9 @@ if(propertyData != null)
 		propMap.put("User_Source",sellerData.get("Seller_Source"));
 		propMap.put("User_CTA",sellerData.get("Channel"));
 		propMap.put("Call_Status",sellerData.get("Call_Status"));
-		propMap.put("Created_Time",sellerData.get("Created_Time"));
-		propMap.put("Modified_Time",sellerData.get("Modified_Time"));
 		owner = sellerData.get("Owner");
 		propMap.put("Truva_RM",owner.get("name"));
 		propMap.put("Property_Created",sellerData.get("Property_Created"));
-		propMap.put("Truva_Micromarket",sellerData.get("Truva_Micromarket"));
 		propMap.put("Reason_for_not_Truva_Qualified",sellerData.get("Truva_Qualified"));
 		propMap.put("Spouse_Name",sellerData.get("Spouse_Name"));
 		propMap.put("Spouse_Phone_Number",sellerData.get("Spouse_Phone_Number"));
@@ -42,7 +151,6 @@ if(propertyData != null)
 		propMap.put("Campaign_Source",sellerData.get("Campaign_Source"));
 		propMap.put("Adset_Name",sellerData.get("Adset_Name"));
 		propMap.put("Ad_Name",sellerData.get("Ad_Name"));
-		propMap.put("Is_Active","true");
 		info "Final payload:" + propMap;
 		api = "https://qqvnbapdea.execute-api.ap-south-1.amazonaws.com/prod/sandbox-netcore-sync";
 		resp = invokeurl

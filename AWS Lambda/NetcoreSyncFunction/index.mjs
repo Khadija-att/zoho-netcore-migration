@@ -32,6 +32,7 @@ export const handler = async (event) => {
             : receivedZohoData;
 
         const userType = parsed.User_Type;
+        const isActive = parsed.Is_Active;
         console.log(`Processing messageId=${messageId}, userType=${userType}`);
         let transformationFn, apiKey, assetId;
 
@@ -60,7 +61,7 @@ export const handler = async (event) => {
             return { messageId, statusCode: 400, reason: "Unknown User_Type" };
         }
 
-        await saveToRawS3(messageId, receivedZohoData, userType); 
+        // await saveToRawS3(messageId, receivedZohoData, userType); 
 
         const transformationForNetCore = await transformationFn(receivedZohoData);
         console.log("transformationForNetCore->>>>>>>", transformationForNetCore);
@@ -87,7 +88,8 @@ export const handler = async (event) => {
             netcoreResponse.data,
             netcoreResponse.Created_Time,
             netcoreResponse.Modified_Time,
-            userType
+            userType,
+            isActive
           );
           
 

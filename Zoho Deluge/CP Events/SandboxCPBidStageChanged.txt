@@ -73,7 +73,15 @@ webhookPayload.put("Bid_Source",ifnull(bidData.get("Lead_Source"),""));
 webhookPayload.put("Bid_Next_steps",ifnull(bidData.get("Next_steps"),""));
 webhookPayload.put("Bid_Created_Time",ifnull(bidData.get("Created_Time"),""));
 webhookPayload.put("Bid_Truva_Micromarket",ifnull(bidData.get("Truva_Micromarket"),""));
-webhookPayload.put("Dislikes",ifnull(bidData.get("Dislikes"),""));
+dislikesList = bidData.get("Dislikes");
+if(dislikesList.isEmpty())
+{
+	webhookPayload.put("Dislikes","");
+}
+else
+{
+	webhookPayload.put("Dislikes",dislikesList);
+}
 webhookPayload.put("No_of_Visits",ifnull(bidData.get("No_of_Visits"),""));
 webhookPayload.put("Bid_CP_Tagging_Status",ifnull(bidData.get("CP_Tagging_Status"),""));
 webhookPayload.put("previous_stage",ifnull(bidHistory.get("Stage"),""));
