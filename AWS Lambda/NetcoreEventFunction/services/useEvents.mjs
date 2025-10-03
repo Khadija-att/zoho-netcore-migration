@@ -30,6 +30,7 @@ async function sendNetcoreActivity(activity_name, identity, activity_params, use
       activity_source: "web",
       activity_params,
     };  
+    console.log(JSON.stringify(event) + "--------------------> Event h")
     const axiosConfig = {
       headers: {
         "Content-Type": "application/json",

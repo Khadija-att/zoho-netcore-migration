@@ -1,6 +1,6 @@
 import axios from "axios";
 
-async function addContactToZoho(data, NETCORE_CONTACT_URL, NETCORE_API_KEY, ASSET_ID) {
+async function addContactToNetcore(data, NETCORE_CONTACT_URL, NETCORE_API_KEY, ASSET_ID) {
     let requestUrl;
     const urlObj = new URL(NETCORE_CONTACT_URL);
     urlObj.searchParams.set('type', 'contact');
@@ -31,4 +31,4 @@ async function addContactToZoho(data, NETCORE_CONTACT_URL, NETCORE_API_KEY, ASSE
     return response;
 }
 
-export default addContactToZoho;
+export default addContactToNetcore;

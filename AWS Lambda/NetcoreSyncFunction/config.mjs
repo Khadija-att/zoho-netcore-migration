@@ -6,6 +6,7 @@ const baseConfig = {
   BUCKET_RAW: process.env.BUCKET_RAW,
   NETCORE_CONTACT_URL: process.env.NETCORE_CONTACT_URL,
   NETCORE_EVENT_URL: process.env.NETCORE_EVENT_URL,
+  BUCKET_KEY_PREFIX: process.env.BUCKET_KEY_PREFIX
 };
 
 const envConfig = {

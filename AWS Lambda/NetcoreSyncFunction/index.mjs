@@ -3,7 +3,7 @@ import { sellerTransformations } from './transformations/seller/sellerTransforma
 import { propertyTransformations } from './transformations/property/propertyTransformation.mjs'
 import { channelPartnerTransformations } from './transformations/channelPartner/channelPartnerTransformation.mjs'
 import { saveToRawS3, saveToProcessedS3 } from './services/s3Services.mjs';
-import addContactToZoho from './services/netcoreServices.mjs';
+import addContactToNetcore from './services/netcoreServices.mjs';
 import sendNetcoreEvent from './services/useEvents.mjs';
 import config from "./config.mjs";
 const {
@@ -17,7 +17,7 @@ const {
   SELLER_ASSET_ID,
   SELLER_NETCORE_API_KEY,
   CHANNEL_PARTNER_ASSET_ID,
-  CHANNEL_PARTNER_NETCORE_API_KEY
+  CHANNEL_PARTNER_NETCORE_API_KEY,
 } = config;
 
 export const handler = async (event) => {
@@ -26,16 +26,11 @@ export const handler = async (event) => {
       event.Records.map(async (record) => {
         const messageId = record.messageId;
         const receivedZohoData = record.body;
-        const parsed =
-          typeof receivedZohoData === "string"
-            ? JSON.parse(receivedZohoData)
-            : receivedZohoData;
-
+        const parsed = typeof receivedZohoData === "string"? JSON.parse(receivedZohoData) : receivedZohoData;
         const userType = parsed.User_Type;
         const isActive = parsed.Is_Active;
         console.log(`Processing messageId=${messageId}, userType=${userType}`);
         let transformationFn, apiKey, assetId;
-
         switch (userType) {
           case "Buyer":
             transformationFn = buyerTransformations;
@@ -60,26 +55,19 @@ export const handler = async (event) => {
           default:
             return { messageId, statusCode: 400, reason: "Unknown User_Type" };
         }
-
-        // await saveToRawS3(messageId, receivedZohoData, userType); 
-
         const transformationForNetCore = await transformationFn(receivedZohoData);
         console.log("transformationForNetCore->>>>>>>", transformationForNetCore);
-
         if (!transformationForNetCore) {
           return { messageId, statusCode: 400, reason: "Transformation failed" };
         }
         console.log("Keys", NETCORE_CONTACT_URL, apiKey, assetId);
-
-        const netcoreResponse = await addContactToZoho(
+        const netcoreResponse = await addContactToNetcore(
           transformationForNetCore,
           NETCORE_CONTACT_URL,
           apiKey,
           assetId
         );
-
         console.log("NetCore Response:", netcoreResponse);
-
         if (netcoreResponse.status !== 200) {
           return { messageId, statusCode: 400, reason: "Netcore API failed" };
         }
@@ -91,21 +79,15 @@ export const handler = async (event) => {
             userType,
             isActive
           );
-          
-
-
           await saveToProcessedS3(messageId, transformationForNetCore, userType);
-
           if (sendEvent.status === 200) {
             return { messageId, statusCode: 200 };
           } else {
             return { messageId, statusCode: 400, reason: "Event sending failed" };
           }
-
         return { messageId, statusCode: 200 };
       })
     );
-
     return {
       statusCode: 200,
       body: JSON.stringify({ results }),
