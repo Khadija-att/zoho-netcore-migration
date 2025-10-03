@@ -16,8 +16,6 @@ try
 	webhookPayload.put("Property_Id",propIdStr);
 	webhookPayload.put("Is_Active","false");
 	webhookPayload.put("User_Type","Property");
-	webhookPayload.put("Created_Time",propertyData.get("Created_Time"));
-	webhookPayload.put("Modified_Time",propertyData.get("Modified_Time"));
 	info webhookPayload;
 	apiendpoint = "https://qqvnbapdea.execute-api.ap-south-1.amazonaws.com/prod/sandbox-netcore-sync";
 	response = invokeurl

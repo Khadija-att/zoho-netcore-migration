@@ -16,8 +16,6 @@ try
 	webhookPayload.put("Lead_Id",leadIdStr);
 	webhookPayload.put("Is_Active","false");
 	webhookPayload.put("User_Type","Buyer");
-	webhookPayload.put("Created_Time",leadData.get("Created_Time"));
-	webhookPayload.put("Modified_Time",leadData.get("Modified_Time"));
 	info webhookPayload;
 	apiendpoint = "https://qqvnbapdea.execute-api.ap-south-1.amazonaws.com/prod/sandbox-netcore-sync";
 	response = invokeurl

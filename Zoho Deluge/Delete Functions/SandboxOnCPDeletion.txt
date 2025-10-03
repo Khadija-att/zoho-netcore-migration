@@ -1,4 +1,4 @@
-void automation.SandboxOnCPDeletion(int cpID)
+void automation.SandboxOnCPDeletion(Int cpID)
 {
 info "Processing CP ID: " + cpID;
 cpData = zoho.crm.getRecordById("Accounts",cpID);
@@ -16,8 +16,6 @@ try
 	webhookPayload.put("Channel_Partner_Id",cpIdStr);
 	webhookPayload.put("Is_Active","false");
 	webhookPayload.put("User_Type","Channel Partner");
-	webhookPayload.put("Created_Time",cpData.get("Created_Time"));
-	webhookPayload.put("Modified_Time",cpData.get("Modified_Time"));
 	info webhookPayload;
 	apiendpoint = "https://qqvnbapdea.execute-api.ap-south-1.amazonaws.com/prod/sandbox-netcore-sync";
 	response = invokeurl
