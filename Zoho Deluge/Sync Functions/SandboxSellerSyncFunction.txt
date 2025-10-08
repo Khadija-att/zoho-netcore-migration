@@ -38,6 +38,7 @@ if(propertyData != null)
 		propMap.put("Product_Category",propertyData.get("Product_Category"));
 		propMap.put("Truva_Micromarket",propertyData.get("Truva_Micromarket"));
 		propMap.put("Property_Seller_Source",propertyData.get("Seller_Source"));
+		propMap.put("Archetype_Score_v1",propertyData.get("Archetype_Score_v1"));
 		propMap.put("Visit_Date",propertyData.get("Visit_Date"));
 		propMap.put("Visit_by",null);
 		visitBy = propertyData.get("Visit_by");
@@ -177,6 +178,7 @@ webhookPayload.put("Last_Name",sellerData.get("Last_Name"));
 webhookPayload.put("Email",sellerData.get("Email"));
 webhookPayload.put("Name",sellerData.get("Name"));
 webhookPayload.put("User_Type","Seller");
+webhookPayload.put("Locality_Society_Name",sellerData.get("Locality_Society_Name"));
 webhookPayload.put("User_Source",sellerData.get("Seller_Source"));
 webhookPayload.put("User_CTA",sellerData.get("Channel"));
 webhookPayload.put("Call_Status",sellerData.get("Call_Status"));

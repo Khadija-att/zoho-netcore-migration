@@ -1,0 +1,17 @@
+void schedule.SandboxProperySellerRefresh()
+{
+props = zoho.crm.getRecords("Products");
+if(props != null && props.size() > 0)
+{
+	for each  p in props
+	{
+		sellerLookup = p.get("Seller");
+		if(sellerLookup == null || sellerLookup == "")
+		{
+			propId = p.get("id");
+			info "Property " + propId + " is Live and has no Seller. Syncing...";
+			automation.SandboxPropertiesSyncFunction(propId);
+		}
+	}
+}
+}

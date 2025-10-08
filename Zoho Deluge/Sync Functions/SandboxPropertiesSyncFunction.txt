@@ -33,6 +33,7 @@ if(owner != null && owner != "")
 webhookPayload.put("Priority",propertyData.get("Priority"));
 webhookPayload.put("Created_Time",propertyData.get("Created_Time"));
 webhookPayload.put("Modified_Time",propertyData.get("Modified_Time"));
+webhookPayload.put("Archetype_Score_v1",propertyData.get("Archetype_Score_v1"));
 webhookPayload.put("Product_Category",propertyData.get("Product_Category"));
 webhookPayload.put("Truva_Micromarket",propertyData.get("Truva_Micromarket"));
 webhookPayload.put("Property_Seller_Source",propertyData.get("Seller_Source"));
@@ -44,6 +45,7 @@ if(visitBy != null)
 	webhookPayload.put("Visit_by",visitBy.get("name"));
 }
 webhookPayload.put("Go_Live_Date",propertyData.get("Go_Live_Date"));
+webhookPayload.put("Archetype_Score_v1",propertyData.get("Archetype_Score_v1"));
 webhookPayload.put("Explore_Later_On",propertyData.get("Explore_Later_On"));
 webhookPayload.put("Seller_Profile",propertyData.get("Seller_Profile"));
 webhookPayload.put("Likelihood",propertyData.get("Likelihood"));
@@ -65,9 +67,6 @@ webhookPayload.put("Buyer_MoU_Signing_Date",propertyData.get("Buyer_MoU_Signing_
 webhookPayload.put("Tri_Party_MOU",propertyData.get("Tri_Party_MOU"));
 webhookPayload.put("Exclusivity_Agreement",propertyData.get("Exclusivity_Agreement"));
 webhookPayload.put("Is_Active","true");
-webhookPayload.put("Tower",null);
-webhookPayload.put("Society",null);
-webhookPayload.put("Township",null);
 towerLookup = propertyData.get("Tower");
 info towerLookup;
 info "Tower lookup raw value: " + towerLookup;
@@ -86,8 +85,12 @@ if(towerLookup != null && towerLookup != "")
 		}
 	}
 }
-webhookPayload.put("Acq_Channel_Partner_Name",null);
-webhookPayload.put("Acq_Channel_Partner_Number",null);
+else
+{
+	webhookPayload.put("Tower",null);
+	webhookPayload.put("Society",null);
+	webhookPayload.put("Township",null);
+}
 channelPartnerLookup = propertyData.get("Account_Name");
 info "Channel Partner lookup raw value: " + channelPartnerLookup;
 if(channelPartnerLookup != null && channelPartnerLookup != "")
@@ -104,8 +107,11 @@ if(channelPartnerLookup != null && channelPartnerLookup != "")
 		}
 	}
 }
-webhookPayload.put("Acq_Society_Partner_Name",null);
-webhookPayload.put("Acq_Society_Partner_Number",null);
+else
+{
+	webhookPayload.put("Acq_Channel_Partner_Name",null);
+	webhookPayload.put("Acq_Channel_Partner_Number",null);
+}
 societyPartnerLookup = propertyData.get("Society_Partner");
 info "Society Partner lookup raw value: " + societyPartnerLookup;
 if(societyPartnerLookup != null && societyPartnerLookup != "")
@@ -121,6 +127,11 @@ if(societyPartnerLookup != null && societyPartnerLookup != "")
 			webhookPayload.put("Acq_Society_Partner_Number",spDetails.get("Phone"));
 		}
 	}
+}
+else
+{
+	webhookPayload.put("Acq_Society_Partner_Name",null);
+	webhookPayload.put("Acq_Society_Partner_Number",null);
 }
 sellerLookup = propertyData.get("Seller");
 if(sellerLookup != null && sellerLookup != "")
@@ -157,8 +168,37 @@ if(sellerLookup != null && sellerLookup != "")
 			webhookPayload.put("Campaign_Source",sellerData.get("Campaign_Source"));
 			webhookPayload.put("Adset_Name",sellerData.get("Adset_Name"));
 			webhookPayload.put("Ad_Name",sellerData.get("Ad_Name"));
+			webhookPayload.put("Locality_Society_Name",sellerData.get("Locality_Society_Name"));
 		}
 	}
+}
+else
+{
+	webhookPayload.put("Phone_Number",null);
+	webhookPayload.put("First_Name",null);
+	webhookPayload.put("Last_Name",null);
+	webhookPayload.put("Email",null);
+	webhookPayload.put("Name",null);
+	webhookPayload.put("User_Source",null);
+	webhookPayload.put("User_CTA",null);
+	webhookPayload.put("Call_Status",null);
+	webhookPayload.put("Property_Created",null);
+	webhookPayload.put("Reason_for_not_Truva_Qualified",null);
+	webhookPayload.put("Spouse_Name",null);
+	webhookPayload.put("Spouse_Phone_Number",null);
+	webhookPayload.put("Secondary_Email",null);
+	webhookPayload.put("Call_Attempts",null);
+	webhookPayload.put("Reason_for_lead_drop",null);
+	webhookPayload.put("Follow_Up_on",null);
+	webhookPayload.put("DND",null);
+	webhookPayload.put("Last_Called_on",null);
+	webhookPayload.put("Periscope_Sent",null);
+	webhookPayload.put("Periscope_Status",null);
+	webhookPayload.put("Campaign_Name",null);
+	webhookPayload.put("Campaign_Source",null);
+	webhookPayload.put("Adset_Name",null);
+	webhookPayload.put("Ad_Name",null);
+	webhookPayload.put("Locality_Society_Name",null);
 }
 info "Final payload:" + webhookPayload;
 apiEndpoint = "https://qqvnbapdea.execute-api.ap-south-1.amazonaws.com/prod/sandbox-netcore-sync";

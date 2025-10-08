@@ -1,16 +1,8 @@
-void automation.SandboxOnSellerDeletion1(Int sellerID)
+void automation.SandboxOnSellerDeletion(Int sellerID)
 {
-info "Processing Lead ID: " + sellerID;
-sellerData = zoho.crm.getRecordById("Sellers",sellerID);
-info sellerData;
 try 
 {
-	if(sellerData == null)
-	{
-		info "Failed to fetch Lead data - leadData is null";
-		return;
-	}
-	info "Lead data fetched successfully";
+	info "Processing Seller ID: " + sellerID;
 	sellerIdStr = sellerID.toString();
 	webhookPayload = Map();
 	webhookPayload.put("Seller_Id",sellerIdStr);
