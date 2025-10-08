@@ -25,7 +25,7 @@ const channelPartnerSchema = z.object({
   setIfDefined(result, "MOBILE", src.Phone ? cleanPhone(src.Phone) : src.Phone);
   setIfDefined(result, "COMPANY_NAME", src.Company_Name);
   setIfDefined(result, "USER_CREATED_TIME", src.Created_Time ? new Date(src.Created_Time).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }) : undefined);
-  setIfDefined(result, "USER_MODIFIED_TIME", src.Created_Time ? new Date(src.Modified_Time).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }) : undefined);
+  setIfDefined(result, "USER_MODIFIED_TIME", src.Modified_Time ? new Date(src.Modified_Time).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }) : undefined);
   setIfDefined(result, "TRUVA_RM", src.Channel_Partner_Owner);
   setIfDefined(result, "CP_POSITION", src.Type);
   setIfDefined(result, "IS_ACTIVE", toIsActive(src.Is_Active));

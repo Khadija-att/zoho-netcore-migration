@@ -7,23 +7,20 @@ const {
     SELLER_ASSET_ID,
     SELLER_NETCORE_API_KEY,
     CHANNEL_PARTNER_NETCORE_API_KEY,
-    CHANNEL_PARTNER_ASSET_ID
+    CHANNEL_PARTNER_ASSET_ID,
+    NETCORE_CONTACT_URL
 } = config;
 
 function isUpdateEvent(createdTimeStr, modifiedTimeStr) {
     if (!createdTimeStr || !modifiedTimeStr) return false;
-
     const created = new Date(Date.parse(createdTimeStr));
     const modified = new Date(Date.parse(modifiedTimeStr));
-
     if (isNaN(created.getTime()) || isNaN(modified.getTime())) {
         console.warn("Invalid dates:", createdTimeStr, modifiedTimeStr);
         return false;
     }
-
     return modified.getTime() > created.getTime();
 }
-
 
 async function sendNetcoreEvent(data, USER_CREATED_TIME, USER_MODIFIED_TIME, USER_TYPE, isActive) {
     let eventType, apiKey, assetId;
@@ -68,7 +65,6 @@ async function sendNetcoreEvent(data, USER_CREATED_TIME, USER_MODIFIED_TIME, USE
         apiKey,
         assetId
     );
-
     const statusResponse = {
         statusCode: response.status,
     };
@@ -100,6 +96,5 @@ async function sendEvent(activity_name, identity, activity_params, apiKey, asset
         console.log(err)
     }
 }
-
 
 export default sendNetcoreEvent;

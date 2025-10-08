@@ -55,7 +55,7 @@ const propSchema = z.object({
   User_CTA: z.string().optional().nullable(),
   Call_Status: z.string().optional().nullable(),
   Property_Created: z.any().optional().nullable(),
-  Reason_for_not_Truva_Qualified: z.array(z.string()).nullable().optional(),
+  Reason_for_not_Truva_Qualified: z.any().nullable().optional(),
   Spouse_Phone_Number: z.string().nullable().optional(),
   Spouse_Name: z.string().nullable().optional(),
   Secondary_Email:z.string().nullable().optional(),
@@ -71,7 +71,9 @@ const propSchema = z.object({
   Adset_Name: z.string().optional().nullable(),
   Ad_Name: z.string().optional().nullable(),
   Is_Active: z.any().optional().nullable(),
-  lead_activity: z.string().optional().nullable()
+  lead_activity: z.string().optional().nullable(),
+  Archetype_Score_v1: z.any().optional().nullable(),
+  Locality_Society_Name: z.string().optional().nullable(),
 }).transform(src => {
   const result = { USER_ID: src.Property_Id };
   setIfDefined(result, "PROPERTY_NAME", src.Property_Name);
@@ -114,14 +116,14 @@ const propSchema = z.object({
   setIfDefined(result, "SOCIETY", src.Society);
   setIfDefined(result, "TOWNSHIP", src.Township);
   setIfDefined(result, "ACQ_CHANNEL_PARTNER_NAME", src.Acq_Channel_Partner_Name);
-  setIfDefined(result, "ACQ_CHANNEL_PARTNER_NUMBER", cleanPhone(src.Acq_Channel_Partner_Number));
+  setIfDefined(result, "ACQ_CHANNEL_PARTNER_NUMBER", src.Acq_Channel_Partner_Number ? cleanPhone(src.Acq_Channel_Partner_Number) : null);
   setIfDefined(result, "ACQ_SOCIETY_PARTNER_NAME", src.Acq_Society_Partner_Name);
-  setIfDefined(result, "ACQ_SOCIETY_PARTNER_NUMBER", cleanPhone(src.Acq_Society_Partner_Number));
+  setIfDefined(result, "ACQ_SOCIETY_PARTNER_NUMBER", src.Acq_Society_Partner_Number ? cleanPhone(src.Acq_Society_Partner_Number) : null);
   setIfDefined(result, "EMAIL", src.Email);
   setIfDefined(result, "MOBILE", src.Phone_Number ? cleanPhone(src.Phone_Number) : src.Phone_Number);
   setIfDefined(result, "SPOUSE_PHONE", src.Spouse_Phone_Number ? cleanPhone(src.Spouse_Phone_Number) : src.Spouse_Phone_Number);
   setIfDefined(result, "SPOUSE_NAME", src.Spouse_Name);
-  setIfDefined(result, "NAME", src.Name || `${(src.First_Name || "")} ${(src.Last_Name || "")}`.trim());
+  setIfDefined(result, "NAME", src.Name);
   setIfDefined(result, "FIRST_NAME", src.First_Name);
   setIfDefined(result, "LAST_NAME", src.Last_Name);
   setIfDefined(result, "USER_SOURCE", src.User_Source);
@@ -132,7 +134,7 @@ const propSchema = z.object({
   setIfDefined(result, "SECONDARY_EMAIL", src.Secondary_Email);
   setIfDefined(result, "CALL_ATTEMPTS", toInteger(src.Call_Attempts));
   setIfDefined(result, "REASON_FOR_LEAD_DROP", src.Reason_for_lead_drop);
-  setIfDefined(result, "FOLLOW_UP_ON", src.Follow_Up_on ? new Date(src.Follow_Up_on).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }) : undefined);
+  setIfDefined(result, "FOLLOW_UP_ON", src.Follow_Up_on ? new Date(src.Follow_Up_on).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }) : null);
   setIfDefined(result, "DND", toYesNo(src.DND));
   setIfDefined(result, "LAST_CALLED_ON", toYYYYMMDD(src.Last_Called_on));
   setIfDefined(result, "PERISCOPE_SENT", src.Periscope_Sent);
@@ -143,6 +145,8 @@ const propSchema = z.object({
   setIfDefined(result, "AD_NAME", src.Ad_Name);
   setIfDefined(result, "IS_ACTIVE", trueFalseString(src.Is_Active));
   setIfDefined(result, "ACTIVITY", src.lead_activity ?? "add");
+  setIfDefined(result, "ARCHETYPE_SCORE_V1", src.Archetype_Score_v1);
+  setIfDefined(result, "LOCALITY_SOCIETY_NAME", src.Locality_Society_Name);
   result._original_payload = src;
   return result;
 });

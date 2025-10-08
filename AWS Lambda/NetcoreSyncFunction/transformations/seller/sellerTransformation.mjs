@@ -17,7 +17,7 @@ const sellerSchema = z.object({
   Truva_RM: z.string().optional().nullable(),
   Property_Created: z.any().optional().nullable(),
   Truva_Micromarket: z.string().nullable().optional(),
-  Reason_for_not_Truva_Qualified: z.array(z.string()).nullable().optional(),
+  Reason_for_not_Truva_Qualified: z.any().nullable().optional(),
   Spouse_Phone_Number: z.string().nullable().optional(),
   Spouse_Name: z.string().nullable().optional(),
   Secondary_Email:z.string().nullable().optional(),
@@ -33,7 +33,9 @@ const sellerSchema = z.object({
   Adset_Name: z.string().optional().nullable(),
   Ad_Name: z.string().optional().nullable(),
   Is_Active: z.any().optional().nullable(),
-  lead_activity: z.string().optional().nullable()
+  lead_activity: z.string().optional().nullable(),
+  Archetype_Score_v1: z.string().optional().nullable(),
+  Locality_Society_Name: z.string().optional().nullable(),
 }).transform(src => {
   const result = { USER_ID: src.Seller_Id };
   setIfDefined(result, "EMAIL", src.Email);
@@ -67,6 +69,8 @@ const sellerSchema = z.object({
   setIfDefined(result, "AD_NAME", src.Ad_Name);
   setIfDefined(result, "IS_ACTIVE", trueFalseString(src.Is_Active));
   setIfDefined(result, "ACTIVITY", src.lead_activity ?? "add");
+  setIfDefined(result, "ARCHETYPE_SCORE_V1", src.Archetype_Score_v1);
+  setIfDefined(result, "LOCALITY_SOCIETY_NAME", src.Locality_Society_Name);
   result._original_payload = src;
   return result;
 });
